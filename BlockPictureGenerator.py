@@ -1,6 +1,7 @@
 import random
 from tkinter import *
 from PIL import Image, ImageDraw, ImageColor
+from CalculCoordinates import *
 
 
 # Define the Colours
@@ -11,30 +12,23 @@ yellow = "rgb(220,220,000)"
 colours = ["yellow","red","blue","green"]
 colour_dict = {"red":red,"blue":blue,"green":green,"yellow":yellow}
 
-# Define coordinates for drawing the picture
-size_pic = 300
-size_grid = 200
-edge = (size_pic - size_grid) / 2
-size_all_blocks = 0.6 * size_grid
-size_block = size_all_blocks / 4
-space = size_grid - size_all_blocks
-distance = space / 5
-'''coordinates = {
-    1: {1: ([(distance+edge,distance+edge), (distance+size_block+edge, distance+size_block+edge)]), 2: ([(2*distance+size_block+edge,distance+edge),(2*distance+2*size_block+edge,distance+size_block+edge)]),
-        3: ([(3*distance+2*size_block+edge,distance+edge),(3*distance+3*size_block+edge,distance+size_block+edge)]), 4:([(4*distance+3*size_block+edge,distance+edge),(4*distance+4*size_block+edge,distance+size_block+edge)])},
-    2: {1: ([(distance+edge,2*distance+size_block+edge),(distance+size_block+edge,2*distance+2*size_block+edge)]), 2: ([(2*distance+size_block+edge,2*distance+size_block+edge),(2*distance+2*size_block+edge,2*distance+2*size_block+edge)]),
-        3: ([(3*distance+2*size_block+edge,2*distance+size_block+edge),(3*distance+3*size_block+edge,2*distance+2*size_block+edge)]), 4:([(4*distance+3*size_block+edge,2*distance+size_block+edge),(4*distance+4*size_block+edge,2*distance+2*size_block+edge)])},
-    3: {1: ([(distance+edge,3*distance+2*size_block+edge),(distance+size_block+edge,3*distance+3*size_block+edge)]), 2: ([(2*distance+size_block+edge,3*distance+2*size_block+edge),(2*distance+2*size_block+edge,3*distance+3*size_block+edge)]),
-        3: ([(3*distance+2*size_block+edge,3*distance+2*size_block+edge),(3*distance+3*size_block+edge,3*distance+3*size_block+edge)]), 4:([(4*distance+3*size_block+edge,3*distance+2*size_block+edge),(4*distance+4*size_block+edge,3*distance+3*size_block+edge)])},
-    4: {1: ([(distance+edge,4*distance+3*size_block+edge),(distance+size_block+edge,4*distance+4*size_block+edge)]), 2: ([(2*distance+size_block+edge,4*distance+3*size_block+edge),(2*distance+2*size_block+edge,4*distance+4*size_block+edge)]),
-        3: ([(3*distance+2*size_block+edge,4*distance+3*size_block+edge),(3*distance+3*size_block+edge,4*distance+4*size_block+edge)]), 4:([(4*distance+3*size_block+edge,4*distance+3*size_block+edge),(4*distance+4*size_block+edge,4*distance+4*size_block+edge)])}
-}'''
+
+# Variables for the picture
+size_pic = 300          # length of one side of the picture
+size_grid = 200         # length of one side of the grid
+dim = 4                 # number of blocks possible per row and per column
+rel_blocks = 0.6        # how much of the length of one side of grid should be made up by lengths of the blocks
 
 
+# Calculate coordinates automatically
+#coordinates = calculate_coordinates(size_pic, size_grid, dim, rel_blocks)
+
+# Use fixed coordinates
 coordinates = {1:{1:([(55,55),(95,95)]),2:([(105,55),(145,95)]),3:([(155,55),(195,95)]),4:([(205,55),(245,95)])},
                2:{1:([(55,105),(95,145)]),2:([(105,105),(145,145)]),3:([(155,105),(195,145)]),4:([(205,105),(245,145)])},
                3:{1:([(55,155),(95,195)]),2:([(105,155),(145,195)]),3:([(155,155),(195,195)]),4:([(205,155),(245,195)])},
                4:{1:([(55,205),(95,245)]),2:([(105,205),(145,245)]),3:([(155,205),(195,245)]),4:([(205,205),(245,245)])}}
+
 
 class Block:
     """
@@ -124,6 +118,7 @@ class Picture:
         pass
         image1 = Image.new("RGB", (size_pic, size_pic), "white")
         draw = ImageDraw.Draw(image1)
+        edge = (size_pic-size_grid)/2
         draw.rectangle([(edge,edge),(size_pic-edge,size_pic-edge)],fill="white",outline="black")
     
         for row in coordinates:
@@ -137,6 +132,9 @@ class Picture:
         os.startfile(self.name+".jpg")
 
 
+
+# CODE FOR TESTING
+
 # Create a Picture with random number of blocks and name test.png
 p1 = Picture()
 print(p1.grid)
@@ -148,5 +146,11 @@ p2.draw()
 
 # Create a Picture with blocks in every cell
 # Used to try out different sizes and the automatic calculation of the coordinates
-'''p_coord_test = Picture((16,17), "full_pic_400_350_08")
+'''p_coord_test = Picture((16,17), "full_pic_300_200_07")
 p_coord_test.draw()'''
+
+
+# Check that coordinates are correct
+'''all_b = p_coord_test.blocks
+for b in all_b:
+    print("colour: " + b.colour + "  x: " + str(b.x) + "  y: " + str(b.y))'''
