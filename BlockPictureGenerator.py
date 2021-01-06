@@ -12,7 +12,29 @@ colours = ["yellow","red","blue","green"]
 colour_dict = {"red":red,"blue":blue,"green":green,"yellow":yellow}
 
 # Define coordinates for drawing the picture
-coordinates = {1:{1:([(55,55),(95,95)]),2:([(105,55),(145,95)]),3:([(155,55),(195,95)]),4:([(205,55),(245,95)])},2:{1:([(55,105),(95,145)]),2:([(105,105),(145,145)]),3:([(155,105),(195,145)]),4:([(205,105),(245,145)])},3:{1:([(55,155),(95,195)]),2:([(105,155),(145,195)]),3:([(155,155),(195,195)]),4:([(205,155),(245,195)])},4:{1:([(55,205),(95,245)]),2:([(105,205),(145,245)]),3:([(155,205),(195,245)]),4:([(205,205),(245,245)])}}
+size_pic = 300
+size_grid = 200
+edge = (size_pic - size_grid) / 2
+size_all_blocks = 0.6 * size_grid
+size_block = size_all_blocks / 4
+space = size_grid - size_all_blocks
+distance = space / 5
+'''coordinates = {
+    1: {1: ([(distance+edge,distance+edge), (distance+size_block+edge, distance+size_block+edge)]), 2: ([(2*distance+size_block+edge,distance+edge),(2*distance+2*size_block+edge,distance+size_block+edge)]),
+        3: ([(3*distance+2*size_block+edge,distance+edge),(3*distance+3*size_block+edge,distance+size_block+edge)]), 4:([(4*distance+3*size_block+edge,distance+edge),(4*distance+4*size_block+edge,distance+size_block+edge)])},
+    2: {1: ([(distance+edge,2*distance+size_block+edge),(distance+size_block+edge,2*distance+2*size_block+edge)]), 2: ([(2*distance+size_block+edge,2*distance+size_block+edge),(2*distance+2*size_block+edge,2*distance+2*size_block+edge)]),
+        3: ([(3*distance+2*size_block+edge,2*distance+size_block+edge),(3*distance+3*size_block+edge,2*distance+2*size_block+edge)]), 4:([(4*distance+3*size_block+edge,2*distance+size_block+edge),(4*distance+4*size_block+edge,2*distance+2*size_block+edge)])},
+    3: {1: ([(distance+edge,3*distance+2*size_block+edge),(distance+size_block+edge,3*distance+3*size_block+edge)]), 2: ([(2*distance+size_block+edge,3*distance+2*size_block+edge),(2*distance+2*size_block+edge,3*distance+3*size_block+edge)]),
+        3: ([(3*distance+2*size_block+edge,3*distance+2*size_block+edge),(3*distance+3*size_block+edge,3*distance+3*size_block+edge)]), 4:([(4*distance+3*size_block+edge,3*distance+2*size_block+edge),(4*distance+4*size_block+edge,3*distance+3*size_block+edge)])},
+    4: {1: ([(distance+edge,4*distance+3*size_block+edge),(distance+size_block+edge,4*distance+4*size_block+edge)]), 2: ([(2*distance+size_block+edge,4*distance+3*size_block+edge),(2*distance+2*size_block+edge,4*distance+4*size_block+edge)]),
+        3: ([(3*distance+2*size_block+edge,4*distance+3*size_block+edge),(3*distance+3*size_block+edge,4*distance+4*size_block+edge)]), 4:([(4*distance+3*size_block+edge,4*distance+3*size_block+edge),(4*distance+4*size_block+edge,4*distance+4*size_block+edge)])}
+}'''
+
+
+coordinates = {1:{1:([(55,55),(95,95)]),2:([(105,55),(145,95)]),3:([(155,55),(195,95)]),4:([(205,55),(245,95)])},
+               2:{1:([(55,105),(95,145)]),2:([(105,105),(145,145)]),3:([(155,105),(195,145)]),4:([(205,105),(245,145)])},
+               3:{1:([(55,155),(95,195)]),2:([(105,155),(145,195)]),3:([(155,155),(195,195)]),4:([(205,155),(245,195)])},
+               4:{1:([(55,205),(95,245)]),2:([(105,205),(145,245)]),3:([(155,205),(195,245)]),4:([(205,205),(245,245)])}}
 
 class Block:
     """
@@ -100,9 +122,9 @@ class Picture:
         :return: nothing
         """
         pass
-        image1 = Image.new("RGB", (300, 300), "white")
+        image1 = Image.new("RGB", (size_pic, size_pic), "white")
         draw = ImageDraw.Draw(image1)
-        draw.rectangle([(50,50),(250,250)],fill="white",outline="black")
+        draw.rectangle([(edge,edge),(size_pic-edge,size_pic-edge)],fill="white",outline="black")
     
         for row in coordinates:
             for column in coordinates[row]:
@@ -124,12 +146,7 @@ p1.draw()
 p2 = Picture((1,3), "low_complexity")
 p2.draw()
 
-
-"""master = Tk()
-
-w = Canvas(master, width=1000, height=1000)
-w.pack()
-
-w.create_rectangle(50, 20, 100, 70, fill="green2")
-w.create_rectangle(50, 100, 100, 150, fill="red3")
-w.create_rectangle(50, 180, 100, 230, fill="navy")"""
+# Create a Picture with blocks in every cell
+# Used to try out different sizes and the automatic calculation of the coordinates
+'''p_coord_test = Picture((16,17), "full_pic_400_350_08")
+p_coord_test.draw()'''
