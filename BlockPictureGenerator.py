@@ -53,13 +53,16 @@ class Block:
         self.x = x
         self.y = y
 
+    def __str__(self):
+        s = str(self.colour)
+        return s
 
 
 class Picture:
     """
     Class for Pictures displaying blocks in different colours in a 4x4 grid
     """
-    def __init__(self, complexity=(1,17), name="test"):
+    def __init__(self, complexity=(1,7), name="test"):
         """
         :param complexity: a tuple (min_n, max_n + 1) where min_n is the minimal number of blocks and max_n the maximal number of blocks that should be included in the picture
         :param name: name for the saved file of the picture
@@ -106,7 +109,6 @@ class Picture:
             col_index = random_pos[1]
             b.set_coordinates(col_index, row_index)
             grid[row_index-1][col_index-1] = b
-
         return grid
 
 
@@ -131,18 +133,29 @@ class Picture:
         import os
         os.startfile(self.name+".jpg")
 
-
+    def readable_grid(self):
+        new_grid = list()
+        for row in self.grid:
+            new_row = list()
+            for item in row:
+                if item != None:
+                    new_row.append(str(item))
+                else:
+                    new_row.append(None)
+            new_grid.append(new_row)
+        return new_grid
 
 # CODE FOR TESTING
 
 # Create a Picture with random number of blocks and name test.png
 p1 = Picture()
-print(p1.grid)
+#print(p1.grid)
 p1.draw()
+print(p1.readable_grid())
 
 # Create a Picture with 1, 2 or 3 blocks and name low_complexity.png
-p2 = Picture((1,3), "low_complexity")
-p2.draw()
+#p2 = Picture((1,3), "low_complexity")
+#p2.draw()
 
 # Create a Picture with blocks in every cell
 # Used to try out different sizes and the automatic calculation of the coordinates
