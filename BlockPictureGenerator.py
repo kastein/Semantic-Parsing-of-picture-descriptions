@@ -1,6 +1,7 @@
 import random
 from tkinter import *
 from PIL import Image, ImageDraw, ImageColor
+import os
 from CalculCoordinates import *
 
 
@@ -130,7 +131,6 @@ class Picture:
                     draw.rectangle(coordinates[row][column],fill=colour_dict[current_block.colour],outline="black")
 
         image1.save(self.name+".jpg")
-        import os
         os.startfile(self.name+".jpg")
 
     def readable_grid(self):
@@ -145,6 +145,20 @@ class Picture:
             new_grid.append(new_row)
         return new_grid
 
+    def mark(self, spacetobemarked):
+        #spacetobemarked = position of the block(s) that need to be marked
+        with Image.open(self.name+".jpg") as pic:
+            draw = ImageDraw.Draw(pic)
+            for field in spacetobemarked:
+                current_coor = coordinates[field[0]][field[1]]
+                top_left = current_coor[0]
+                bottom_right = current_coor[1]
+                draw.rectangle([(top_left[0], top_left[1]), (bottom_right[0], bottom_right[1])], outline="black")
+                draw.rectangle([(top_left[0]-1, top_left[1]-1), (bottom_right[0]+1, bottom_right[1]+1)], outline="black")
+                draw.rectangle([(top_left[0] - 2, top_left[1] - 2), (bottom_right[0] + 2, bottom_right[1] + 2)], outline="black")
+                draw.rectangle([(top_left[0] - 3, top_left[1] - 3), (bottom_right[0] + 3, bottom_right[1] + 3)], outline="black")
+            pic.save("guess.jpg")
+
 # CODE FOR TESTING
 
 # Create a Picture with random number of blocks and name test.png
@@ -152,7 +166,8 @@ p1 = Picture()
 #print(p1.grid)
 p1.draw()
 print(p1.readable_grid())
-
+guess = [(1,1),(1,2)]
+p1.mark(guess) # creates a file "guess.jpg" that has black boxes around the blocks specified in guess
 # Create a Picture with 1, 2 or 3 blocks and name low_complexity.png
 #p2 = Picture((1,3), "low_complexity")
 #p2.draw()
