@@ -58,7 +58,37 @@ import sys
 from collections import defaultdict
 from itertools import product
 from world import *
+allblocks2 = []
+for row in allblocks:
+    for blo in row:
+        if blo:
+            allblocks2.append(blo)
+allblocks=allblocks2
 
+def positiontest(blocks,blocklocations,position):
+    fulfill = []
+    if position == "u":
+        for b1 in blocks:
+            for b2 in blocklocations:
+                if b1.y > b2.y:
+                    fulfill.append(b1)
+    elif position == "o":
+        for b1 in blocks:
+            for b2 in blocklocations:
+                if b1.y < b2.y:
+                    fulfill.append(b2)
+    return fulfill
+    
+
+def blockfilter(conditions,blocks):
+    fulfill = []
+    for b in blocks:
+        test = True
+        for c in conditions:
+            test = test and c(b)
+        if test:
+            fulfill.append(b)
+    return fulfill
 
 class Grammar:
     def __init__(self, lexicon, rules, functions):
@@ -110,17 +140,23 @@ class Grammar:
 # The lexicon from the paper. This is not used by any learning
 # algorithm. Rather, it's here to create training and testing data.
 gold_lexicon = {
-    'block': [('B','block')],
-    'blocks': [('B','block')],
+    'block': [('B','[]')],
+    'blocks': [('B','[]')],
     'green':[('C','green')],
+    'yellow':[('C','yellow')],
     'blue':[('C','blue')],
     'red':[('C','red')],
     'there':[('E','exist')],
-    'is':[('I','copula')],
-    'are':[('I','copula')],
-    'a':[('N',range(1,int(sys.float_info.max)))],
-    'one':[('N',[1])],
-    'two':[('N',[2])]
+    'is':[('I','identy')],
+    'are':[('I','identy')],
+    'a':[('N','range(1,int(sys.float_info.max))')],
+    'one':[('N','[1]')],
+    'two':[('N','[2]')],
+    'under':[('U','under')],
+    'over':[('U','over')],
+    #'of':[('O','ofl'),('O','ofr')],
+    #'left':[('L','left')],
+    #'right':[('R','right')]
 }
 
 # The binarized version of the rule sets from the paper. These
@@ -130,21 +166,38 @@ gold_lexicon = {
 # N -> U N  semantics: apply U(N)
 # B -> N R  semantics: apply R(N)
 rules = [
-    ['C', 'B', 'BC', (1,0)],
-    ['N','BC','BNC',(1,0)],
-    ['I','BNC','BNC',(0,1)],
-    ['E','BNC','V',(0,1)],
+    ['C', 'B', 'BC', (0,1)],
+    ['E','N','EN',(0,1)],
+    ['E','I','E',(1,0)],
+    ['EN','BC','V',(0,1)],
+    ['U','N','UN',(0,1)],
+    ['UN','BC','L',(0,1)],
+    ['BC','L','BC',(1,0)],
+    #['LEFT','O','LO',(1,0)],
+    #['RIGHT','O','RO'],(1,0),
+    #['LO','N','LON',(0,1)],
+    #['LON','BC','L',(0,1)],
+    #['RO','N','RON',(0,1)],
+    #['RON','BC','L',(0,1)]
+    
 ]
 
 # These are needed to interpret our logical forms with eval. They are
 # imported into the namespace Grammar.sem to achieve that.
 functions = {
     'block': (lambda colour: (lambda number_requirement: (number_requirement,colour))),
-    'copula': (lambda x: x),
-    'exist': (lambda x: len((list(filter(lambda b: b.colour == x[1], allblocks)))) in x[0]),
-    'blue': 'blue',
-    'red': 'red',
-    'green': 'green'
+    'identy': (lambda x: x),
+    'exist': (lambda n : (lambda b: len(blockfilter(b,allblocks)) in n)),
+    'blue': (lambda x: x+[(lambda b:b.colour=="blue")]),
+    'red': (lambda x: x+[(lambda b:b.colour=="red")]),
+    'green': (lambda x: x+[(lambda b:b.colour=="green")]),
+    'yellow':(lambda x: x+[(lambda b:b.colour=="yellow")]),
+    'under':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"u")) in n)]))),
+    'over':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"o")) in n)]))),
+    #'left':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(filter(lambda: b.x==1)) in n)]))),
+    #'right':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(filter(lambda: b.x==4)) in n)]))),
+    #'ofl':(lambda f:(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"l")) in n)])))),
+    #'ofr':(lambda f:(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"r")) in n)]))))    
 }
 
 
