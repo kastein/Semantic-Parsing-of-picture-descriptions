@@ -13,6 +13,9 @@ yellow = "rgb(220,220,000)"
 colours = ["yellow","red","blue","green"]
 colour_dict = {"red":red,"blue":blue,"green":green,"yellow":yellow}
 
+# Define the possible shapes
+shapes = ["circle", "rectangle", "triangle"]
+
 
 # Variables for the picture
 size_pic = 300          # length of one side of the picture
@@ -33,14 +36,15 @@ coordinates = {1:{1:([(55,55),(95,95)]),2:([(105,55),(145,95)]),3:([(155,55),(19
 
 class Block:
     """
-    Object Block has attributes colour and x and y coordinate
+    Object Block has attributes colour and x and y coordinate and shape (can be circle, triangle or rectangle)
     """
-    def __init__(self, colour):
+    def __init__(self, colour, shape):
         """
         Block object only initialized with colour, coordinates are set separately
         :param colour: a colour as specified in the list colours
         """
         self.colour = colour
+        self.shape = shape
         self.x = None
         self.y = None
 
@@ -55,7 +59,7 @@ class Block:
         self.y = y
 
     def __str__(self):
-        s = str(self.colour)
+        s = self.shape + ": " + self.colour
         return s
 
 
@@ -83,7 +87,8 @@ class Picture:
         blocks_list = []
         while len(blocks_list) < block_number:
             new_colour = random.choice(colours)
-            new_block = Block(new_colour)
+            new_shape = random.choice(shapes)
+            new_block = Block(new_colour, new_shape)
             blocks_list.append(new_block)
         return blocks_list
 
@@ -128,12 +133,29 @@ class Picture:
             for column in coordinates[row]:
                 if self.grid[row-1][column-1]:
                     current_block = self.grid[row-1][column-1]
-                    draw.rectangle(coordinates[row][column],fill=colour_dict[current_block.colour],outline="black")
+                    if current_block.shape == "circle":
+                        draw.ellipse(coordinates[row][column],fill=colour_dict[current_block.colour],outline="black")
+                    elif current_block.shape == "triangle":
+                        coords = coordinates[row][column]
+                        side_length = (coords[1][0] - coords[0][0])
+                        point1 = (coords[0][0] + side_length/2, coords[0][1])
+                        point2 = (coords[0][0], coords[0][1] + side_length)
+                        point3 = coords[1]
+                        draw.polygon([point1,point2,point3],fill=colour_dict[current_block.colour],outline="black")
+                    else:
+                        draw.rectangle(coordinates[row][column],fill=colour_dict[current_block.colour],outline="black")
 
         image1.save(self.name+".jpg")
         os.startfile(self.name+".jpg")
 
+
     def readable_grid(self):
+        """
+        returns a list representation of the grid consisting of n sublists,
+        each corresponding to a row in the grid and an entry for each cell of
+        the grid: the shape and the colour of the block in this cell or None if
+        there is no block in this cell
+        """
         new_grid = list()
         for row in self.grid:
             new_row = list()
@@ -145,8 +167,13 @@ class Picture:
             new_grid.append(new_row)
         return new_grid
 
+
     def mark(self, spacetobemarked):
-        #spacetobemarked = position of the block(s) that need to be marked
+        """
+        draws a rectangle around the blocks that should be marked in the picture
+        and saves the resulting new picture
+        spacetobemarked = position of the block(s) that need to be marked
+        """
         with Image.open(self.name+".jpg") as pic:
             draw = ImageDraw.Draw(pic)
             for field in spacetobemarked:

@@ -30,7 +30,10 @@ test_utterances = [
     'there is a blue block',
     'there is one blue block',
     'there are two blue blocks',
-    'there are two red blocks'
+    'there are two red blocks',
+    'there is a blue block under a yellow block',
+    'there is a blue block under two yellow blocks',
+    'there is a yellow block over a blue block'
 ]
 
 # This is a list of triples (x, y, d), where x is an input string, y
