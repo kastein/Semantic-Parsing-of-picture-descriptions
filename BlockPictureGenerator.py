@@ -59,7 +59,7 @@ class Block:
         self.y = y
 
     def __str__(self):
-        s = str(self.colour)
+        s = self.shape + ": " + self.colour
         return s
 
 
@@ -150,6 +150,12 @@ class Picture:
 
 
     def readable_grid(self):
+        """
+        returns a list representation of the grid consisting of n sublists,
+        each corresponding to a row in the grid and an entry for each cell of
+        the grid: the shape and the colour of the block in this cell or None if
+        there is no block in this cell
+        """
         new_grid = list()
         for row in self.grid:
             new_row = list()
@@ -163,7 +169,11 @@ class Picture:
 
 
     def mark(self, spacetobemarked):
-        #spacetobemarked = position of the block(s) that need to be marked
+        """
+        draws a rectangle around the blocks that should be marked in the picture
+        and saves the resulting new picture
+        spacetobemarked = position of the block(s) that need to be marked
+        """
         with Image.open(self.name+".jpg") as pic:
             draw = ImageDraw.Draw(pic)
             for field in spacetobemarked:
