@@ -67,9 +67,10 @@ class Picture:
     """
     Class for Pictures displaying blocks in different colours in a 4x4 grid
     """
-    def __init__(self, complexity=(1,7), name="test"):
+    def __init__(self, complexity=(3,17), name="test"):
         """
         :param complexity: a tuple (min_n, max_n + 1) where min_n is the minimal number of blocks and max_n the maximal number of blocks that should be included in the picture
+                            default value: between 3 and and 16 blocks
         :param name: name for the saved file of the picture
         default value complexity: at least one block and at most 16 blocks
         default name: test.png
@@ -188,24 +189,28 @@ class Picture:
 
 # CODE FOR TESTING
 
-# Create a Picture with random number of blocks and name test.png
-p1 = Picture()
-#print(p1.grid)
-p1.draw()
-print(p1.readable_grid())
-guess = [(1,1),(1,2)]
-p1.mark(guess) # creates a file "guess.jpg" that has black boxes around the blocks specified in guess
-# Create a Picture with 1, 2 or 3 blocks and name low_complexity.png
-#p2 = Picture((1,3), "low_complexity")
-#p2.draw()
+if __name__=="__main__":
+    # Create a Picture with random number of blocks and name test.png
+    p1 = Picture()
+    #print(p1.grid)
+    p1.draw()
+    print(p1.readable_grid())
+    guess = [(1,1),(1,2)]
+    p1.mark(guess) # creates a file "guess.jpg" that has black boxes around the blocks specified in guess
+    # Create a Picture with 1, 2 or 3 blocks and name low_complexity.png
+    #p2 = Picture((1,3), "low_complexity")
+    #p2.draw()
+    #p1.mark(guess)
 
-# Create a Picture with blocks in every cell
-# Used to try out different sizes and the automatic calculation of the coordinates
-'''p_coord_test = Picture((16,17), "full_pic_300_200_07")
-p_coord_test.draw()'''
+    # Create a Picture with blocks in every cell
+    # Used to try out different sizes and the automatic calculation of the coordinates
+    p_coord_test = Picture((16,17), "full_pic_300_200_07")
+    p_coord_test.draw()
+    p_coord_test.mark(guess)
 
 
-# Check that coordinates are correct
-'''all_b = p_coord_test.blocks
-for b in all_b:
-    print("colour: " + b.colour + "  x: " + str(b.x) + "  y: " + str(b.y))'''
+    # Check that coordinates are correct
+    '''all_b = p_coord_test.blocks
+    for b in all_b:
+        print("colour: " + b.colour + "  x: " + str(b.x) + "  y: " + str(b.y))'''
+
