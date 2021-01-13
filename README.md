@@ -10,7 +10,6 @@ Focused research question:  Can we teach a computer a mapping from natural langu
 * BlockPictureGenerator.py: automatically creates and saves the pictures 
 * CalculCoordinates.py: used to calculate the coordinates for the picture generation in BlockPictureGenerator.py
 * MatrixToLogic.py: generates logic representation for a picture, probably not needed anymore as logic interpretation is taken care of in the grammar/parser
-* PictureGenerator.py: first version of script to automatically generate pictures, not used anymore (-> remove?)
 * grammar.py:
 * semdata.py:
 * world.jpg: example picture for testing and developing of grammar.py
