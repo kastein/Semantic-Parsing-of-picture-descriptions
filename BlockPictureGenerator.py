@@ -145,8 +145,8 @@ class Picture:
                     else:
                         draw.rectangle(coordinates[row][column],fill=colour_dict[current_block.colour],outline="black")
 
-        image1.save(self.name+".jpg")
-        os.startfile(self.name+".jpg")
+        image1.save(self.name+".png")
+        #os.startfile(self.name+".png")
 
 
     def readable_grid(self):
@@ -174,7 +174,7 @@ class Picture:
         and saves the resulting new picture
         spacetobemarked = position of the block(s) that need to be marked
         """
-        with Image.open(self.name+".jpg") as pic:
+        with Image.open(self.name+".png") as pic:
             draw = ImageDraw.Draw(pic)
             for field in spacetobemarked:
                 current_coor = coordinates[field[0]][field[1]]
@@ -184,7 +184,7 @@ class Picture:
                 draw.rectangle([(top_left[0]-1, top_left[1]-1), (bottom_right[0]+1, bottom_right[1]+1)], outline="black")
                 draw.rectangle([(top_left[0] - 2, top_left[1] - 2), (bottom_right[0] + 2, bottom_right[1] + 2)], outline="black")
                 draw.rectangle([(top_left[0] - 3, top_left[1] - 3), (bottom_right[0] + 3, bottom_right[1] + 3)], outline="black")
-            pic.save(self.name + "_guess.jpg")
+            pic.save(self.name + "_guess.png")
 
 # CODE FOR TESTING
 
