@@ -140,8 +140,12 @@ class Grammar:
 # The lexicon from the paper. This is not used by any learning
 # algorithm. Rather, it's here to create training and testing data.
 gold_lexicon = {
-    'block': [('B','[]')],
-    'blocks': [('B','[]')],
+    'square': [('B','[(lambda b: b.shape == "rectangle")]')],
+    'squares': [('B','[(lambda b: b.shape == "rectangle")]')],
+    'triangle': [('B','[(lambda b: b.shape == "triangle")]')],
+    'triangles': [('B','[(lambda b: b.shape == "triangle")]')],
+    'circle': [('B','[(lambda b: b.shape == "circle")]')],
+    'circles': [('B','[(lambda b: b.shape == "circles")]')],
     'green':[('C','green')],
     'yellow':[('C','yellow')],
     'blue':[('C','blue')],
@@ -154,6 +158,7 @@ gold_lexicon = {
     'two':[('N','[2]')],
     'under':[('U','under')],
     'over':[('U','over')],
+    'and':[('AND','und')],
     #'of':[('O','ofl'),('O','ofr')],
     #'left':[('L','left')],
     #'right':[('R','right')]
@@ -173,6 +178,8 @@ rules = [
     ['U','N','UN',(0,1)],
     ['UN','BC','L',(0,1)],
     ['BC','L','BC',(1,0)],
+    ['V','AND','VAND',(1,0)],
+    ['VAND','V','V',(0,1)],
     #['LEFT','O','LO',(1,0)],
     #['RIGHT','O','RO'],(1,0),
     #['LO','N','LON',(0,1)],
@@ -185,9 +192,10 @@ rules = [
 # These are needed to interpret our logical forms with eval. They are
 # imported into the namespace Grammar.sem to achieve that.
 functions = {
-    'block': (lambda colour: (lambda number_requirement: (number_requirement,colour))),
+    'block': (lambda conditions: (lambda number_requirement: (number_requirement,conditions))),
     'identy': (lambda x: x),
     'exist': (lambda n : (lambda b: len(blockfilter(b,allblocks)) in n)),
+    'und':(lambda v1:(lambda v2: v1 and v2)),
     'blue': (lambda x: x+[(lambda b:b.colour=="blue")]),
     'red': (lambda x: x+[(lambda b:b.colour=="red")]),
     'green': (lambda x: x+[(lambda b:b.colour=="green")]),

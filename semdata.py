@@ -22,18 +22,14 @@ gram = Grammar(gold_lexicon, rules, functions)
 
 # Train/test data for the demo:
 train_utterances = [
-    'there is a blue block',
+    'there is a blue triangle',
 ]
 
 # Test:
 test_utterances = [
-    'there is a blue block',
-    'there is one blue block',
-    'there are two blue blocks',
-    'there are two red blocks',
-    'there is a blue block under a yellow block',
-    'there is a blue block under two yellow blocks',
-    'there is a yellow block over a blue block'
+    'there is a red triangle under a blue square',
+    'there is a red circle under a blue square',
+    'there is a yellow square and there are two blue squares'
 ]
 
 # This is a list of triples (x, y, d), where x is an input string, y

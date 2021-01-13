@@ -2,12 +2,13 @@ class Block:
     """
     Object Block has attributes colour and x and y coordinate
     """
-    def __init__(self, colour):
+    def __init__(self, colour, shape):
         """
         Block object only initialized with colour, coordinates are set separately
         :param colour: a colour as specified in the list colours
         """
         self.colour = colour
+        self.shape = shape
         self.x = None
         self.y = None
 
@@ -21,8 +22,20 @@ class Block:
         self.x = x
         self.y = y
 
-blau = Block("blue")
-gelb = Block("yellow")
-blau.set_coordinates(1,3)
-gelb.set_coordinates(1,2)
-allblocks = [[blau,None,None,None],[None,None,None,None],[None,gelb,None,None],[None,None,None,None]]
+
+def set_all_coordinates(chart):
+    for row in range(1,len(chart)+1):
+        for column in range(1,len(chart[row-1])+1):
+            if chart[row-1][column-1] != None:
+                chart[row-1][column-1].set_coordinates(column,row)
+                
+    
+
+
+one = Block("blue","rectangle")
+two = Block("blue","rectangle")
+three = Block("blue","triangle")
+four = Block("yellow","rectangle")
+five = Block("red","triangle")
+allblocks = [[None,one,two,None],[three,None,None,four],[None,five,None,None],[None,None,None,None]]
+set_all_coordinates(allblocks)
