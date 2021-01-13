@@ -184,7 +184,7 @@ class Picture:
                 draw.rectangle([(top_left[0]-1, top_left[1]-1), (bottom_right[0]+1, bottom_right[1]+1)], outline="black")
                 draw.rectangle([(top_left[0] - 2, top_left[1] - 2), (bottom_right[0] + 2, bottom_right[1] + 2)], outline="black")
                 draw.rectangle([(top_left[0] - 3, top_left[1] - 3), (bottom_right[0] + 3, bottom_right[1] + 3)], outline="black")
-            pic.save("guess.jpg")
+            pic.save(self.name + "_guess.jpg")
 
 # CODE FOR TESTING
 
