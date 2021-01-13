@@ -14,4 +14,4 @@ Focused research question:  Can we teach a computer a mapping from natural langu
 * grammar.py:
 * semdata.py:
 * world.jpg: example picture for testing and developing of grammar.py
-* world.py: included in BlockPictureGenerator.py, do we still use/need it? 
+* world.py: list for example picture for testing and developing of grammar.py
