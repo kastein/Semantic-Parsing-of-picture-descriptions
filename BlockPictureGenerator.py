@@ -7,7 +7,7 @@ from CalculCoordinates import *
 
 # Define the Colours
 red = "rgb(205,000,000)"
-blue = "rgb(000,000,139)"
+blue = "rgb(051,153,255)"
 green = "rgb(102,205,000)"
 yellow = "rgb(220,220,000)"
 colours = ["yellow","red","blue","green"]
