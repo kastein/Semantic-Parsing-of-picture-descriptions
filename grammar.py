@@ -140,6 +140,8 @@ class Grammar:
 # The lexicon from the paper. This is not used by any learning
 # algorithm. Rather, it's here to create training and testing data.
 gold_lexicon = {
+    'form':[('B','[]')],
+    'forms':[('B','[]')],
     'square': [('B','[(lambda b: b.shape == "rectangle")]')],
     'squares': [('B','[(lambda b: b.shape == "rectangle")]')],
     'triangle': [('B','[(lambda b: b.shape == "triangle")]')],
@@ -156,6 +158,7 @@ gold_lexicon = {
     'a':[('N','range(1,int(sys.float_info.max))')],
     'one':[('N','[1]')],
     'two':[('N','[2]')],
+    'three':[('N','[3]')],
     'under':[('U','under')],
     'over':[('U','over')],
     'and':[('AND','und')],
@@ -171,13 +174,13 @@ gold_lexicon = {
 # N -> U N  semantics: apply U(N)
 # B -> N R  semantics: apply R(N)
 rules = [
-    ['C', 'B', 'BC', (0,1)],
+    ['C', 'B', 'B', (0,1)],
     ['E','N','EN',(0,1)],
     ['E','I','E',(1,0)],
-    ['EN','BC','V',(0,1)],
+    ['EN','B','V',(0,1)],
     ['U','N','UN',(0,1)],
-    ['UN','BC','L',(0,1)],
-    ['BC','L','BC',(1,0)],
+    ['UN','B','L',(0,1)],
+    ['B','L','B',(1,0)],
     ['V','AND','VAND',(1,0)],
     ['VAND','V','V',(0,1)],
     #['LEFT','O','LO',(1,0)],

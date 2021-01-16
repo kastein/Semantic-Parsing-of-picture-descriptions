@@ -22,14 +22,29 @@ gram = Grammar(gold_lexicon, rules, functions)
 
 # Train/test data for the demo:
 train_utterances = [
-    'there is a blue triangle',
+    'there are two blue squares',
+    'there is one yellow form',
+    'there are two blue squares and there is one blue triangle',
+    'there are three squares',
+    'there is a red triangle',
+    'there are two triangles',
+    'there is one blue triangle and there is one red triangle',
+    'there are two triangles and there is a yellow square',
+    'there is a blue square',
+    'there are two blue squares',
+    'there is one yellow square',
+    'there is a blue form',
+    'there is one red form'
 ]
 
 # Test:
 test_utterances = [
     'there is a red triangle under a blue square',
     'there is a red circle under a blue square',
-    'there is a yellow square and there are two blue squares'
+    'there are two blue squares',
+    'there are two triangles',
+    'there are three blue forms',
+    'there is one blue form'
 ]
 
 # This is a list of triples (x, y, d), where x is an input string, y
