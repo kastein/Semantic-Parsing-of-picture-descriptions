@@ -58,6 +58,8 @@ import sys
 from collections import defaultdict
 from itertools import product
 from world import *
+
+# allblocks are the the blocks from world.py and world.jpg used as example
 allblocks2 = []
 for row in allblocks:
     for blo in row:
@@ -65,7 +67,12 @@ for row in allblocks:
             allblocks2.append(blo)
 allblocks=allblocks2
 
+
 def positiontest(blocks,blocklocations,position):
+    """
+    finds all pairs of blocks b1 form blocks and b2 from blocklocations that
+    stand in relation position to eachother
+    """
     fulfill = []
     if position == "u":
         for b1 in blocks:
@@ -77,10 +84,15 @@ def positiontest(blocks,blocklocations,position):
             for b2 in blocklocations:
                 if b1.y < b2.y:
                     fulfill.append(b2)
+    global guessed_blocks
+    guessed_blocks = fulfill
     return fulfill
     
 
 def blockfilter(conditions,blocks):
+    """
+    returns a list of all blocks that match the specific conditions
+    """
     fulfill = []
     for b in blocks:
         test = True
@@ -88,7 +100,10 @@ def blockfilter(conditions,blocks):
             test = test and c(b)
         if test:
             fulfill.append(b)
+    global guessed_blocks
+    guessed_blocks = fulfill
     return fulfill
+
 
 class Grammar:
     def __init__(self, lexicon, rules, functions):
@@ -218,6 +233,8 @@ if __name__ == '__main__':
     from semdata import test_utterances
     
     gram = Grammar(gold_lexicon, rules, functions)
+    global guessed_blocks
+    guessed_blocks = []
 
     for u in test_utterances:
         lfs = gram.gen(u)
@@ -226,4 +243,5 @@ if __name__ == '__main__':
         for lf in lfs:
             print("\tLF: {}".format(lf))
             print('\tDenotation: {}'.format(gram.sem(lf)))
+            print(guessed_blocks)
 
