@@ -59,14 +59,15 @@ from collections import defaultdict
 from itertools import product
 from world import *
 
+
 # allblocks are the the blocks from world.py and world.jpg used as example
+all_blocks_grid = allblocks.copy()
 allblocks2 = []
 for row in allblocks:
     for blo in row:
         if blo:
             allblocks2.append(blo)
-allblocks=allblocks2
-
+allblocks=allblocks2  
 
 def positiontest(blocks,blocklocations,position):
     """
@@ -244,4 +245,26 @@ if __name__ == '__main__':
             print("\tLF: {}".format(lf))
             print('\tDenotation: {}'.format(gram.sem(lf)))
             print(guessed_blocks)
+
+
+            if u == 'there are three blue forms':
+                print("TEST GUESSING")
+                from BlockPictureGenerator import * 
+                test_pic = Picture(name="test_guessing")
+                test_pic.blocks = allblocks.copy()
+                test_pic.block_n = len(test_pic.blocks)
+                test_pic.grid = all_blocks_grid
+                print(all_blocks_grid)
+
+                test_pic.draw()
+                guess = []
+                for b in guessed_blocks:
+                    guess.append((b.y, b.x))
+                test_pic.mark(guess)
+
+
+                
+
+    
+
 
