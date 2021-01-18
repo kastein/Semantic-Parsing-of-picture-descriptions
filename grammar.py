@@ -60,8 +60,11 @@ from itertools import product
 from world import *
 
 
-# allblocks are the the blocks from world.py and world.jpg used as example
+# allblocks are the the blocks from world.py and world.jpg that get used as an example here
+# all_blocks_grid is needed later to create the Picture Object corresponding to the picutre in world.jpg
 all_blocks_grid = allblocks.copy()
+
+# a list of all blocks that is used for evaluating the truth of the descriptions (doesn't include None anymore)
 allblocks2 = []
 for row in allblocks:
     for blo in row:
@@ -69,10 +72,14 @@ for row in allblocks:
             allblocks2.append(blo)
 allblocks=allblocks2  
 
+
 def positiontest(blocks,blocklocations,position):
     """
-    finds all pairs of blocks b1 form blocks and b2 from blocklocations that
-    stand in relation position to eachother
+    finds all pairs of blocks b1 form blocks and b2 from blocklocations that stand in relation position to eachother
+    e.g. blocks is a list of all blue rectangles and blocklocations a list of all red circles and position is 'u' then the function returns
+    all blocks that are blue rectangels and are below any red circles
+    blocks and blocklocations: two lists of blocks  
+    position: 'u' for under or 'o' for over
     """
     fulfill = []
     if position == "u":
@@ -93,6 +100,7 @@ def positiontest(blocks,blocklocations,position):
 def blockfilter(conditions,blocks):
     """
     returns a list of all blocks that match the specific conditions
+    conditions: list of conditions, e.g. shape == rectangle or color == 
     """
     fulfill = []
     for b in blocks:
@@ -153,8 +161,7 @@ class Grammar:
             setattr(grammar, key, val)
         return eval(lf[0][1]) # Interpret just the root node's semantics. 
 
-# The lexicon from the paper. This is not used by any learning
-# algorithm. Rather, it's here to create training and testing data.
+# The lexicon for our pictures 
 gold_lexicon = {
     'form':[('B','[]')],
     'forms':[('B','[]')],
@@ -183,12 +190,9 @@ gold_lexicon = {
     #'right':[('R','right')]
 }
 
-# The binarized version of the rule sets from the paper. These
-# correspond to
-#
-# N -> B N  semantics: apply B(N)
-# N -> U N  semantics: apply U(N)
-# B -> N R  semantics: apply R(N)
+# The binarized rule set for our pictures
+# The second rule corresponds to:
+# EN -> E N  semantics: apply E(N)
 rules = [
     ['C', 'B', 'B', (0,1)],
     ['E','N','EN',(0,1)],
@@ -210,6 +214,7 @@ rules = [
 
 # These are needed to interpret our logical forms with eval. They are
 # imported into the namespace Grammar.sem to achieve that.
+# so far only above and under are working, we are going to add left and right also
 functions = {
     'block': (lambda conditions: (lambda number_requirement: (number_requirement,conditions))),
     'identy': (lambda x: x),
@@ -228,15 +233,22 @@ functions = {
 }
 
 
+
+
 if __name__ == '__main__':
 
     # Simple demo with the test data:
     from semdata import test_utterances
-    
+
+    # creates the grammar 
     gram = Grammar(gold_lexicon, rules, functions)
+
+    # creates the global variable for keeping track of which block is / blocks are the described one(s)
     global guessed_blocks
     guessed_blocks = []
 
+    # parses all test sentences from semdata.py
+    # prints the derived logical forms for each test sentence and whether the test sentence is true with respect to the example pictuer world.png
     for u in test_utterances:
         lfs = gram.gen(u)
         print("======================================================================")
@@ -244,10 +256,12 @@ if __name__ == '__main__':
         for lf in lfs:
             print("\tLF: {}".format(lf))
             print('\tDenotation: {}'.format(gram.sem(lf)))
-            print(guessed_blocks)
 
-
-            if u == 'there are three blue forms':
+            # visualization of how the computer gives feedback about what it "understood"
+            # for the example test sentence 'there is a red triangle under a blue square' the picture object corresponding to world.png is created
+            # and a png file is created and saved where the blocks that are in all_blocks_grid are marked, e.g. all blocks that are red and have shape
+            # triangle and are positioned below a blue square in the grid are marked
+            if u == 'there is a red triangle under a blue square':
                 print("TEST GUESSING")
                 from BlockPictureGenerator import * 
                 test_pic = Picture(name="test_guessing")
