@@ -270,7 +270,7 @@ if __name__ == '__main__':
             # visualization of how the computer gives feedback about what it "understood"
             # for the example test sentence 'there is a red triangle under a blue square' the picture object corresponding to world.png is created
             # and a png file is created and saved where the blocks that are in all_blocks_grid are marked, e.g. all blocks that are red and have shape
-            # triangle and are positioned below a blue square in the grid are marked
+            # triangle and are positioned below a blue square in the grid are marked as well as the blue squares that are above the red triangle
             if u == 'there is a blue square over a red triangle':
                 from BlockPictureGenerator import * 
                 test_pic = Picture(name="test_guessing")
