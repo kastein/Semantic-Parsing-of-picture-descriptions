@@ -44,8 +44,11 @@ test_utterances = [
     'there are two blue squares',
     'there are two triangles',
     'there are three blue forms',
-    'there is one blue form'
+    'there is one blue form',
+    'there is a red triangle and there is a blue triangle',
+    'there is a blue square over a red triangle'
 ]
+
 
 # This is a list of triples (x, y, d), where x is an input string, y
 # is its preferred logical form, and d is the denotation of the

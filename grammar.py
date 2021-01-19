@@ -70,30 +70,40 @@ for row in allblocks:
     for blo in row:
         if blo:
             allblocks2.append(blo)
-allblocks=allblocks2  
+allblocks=allblocks2
+guessed_blocks = set()
 
 
 def positiontest(blocks,blocklocations,position):
     """
     finds all pairs of blocks b1 form blocks and b2 from blocklocations that stand in relation position to eachother
     e.g. blocks is a list of all blue rectangles and blocklocations a list of all red circles and position is 'u' then the function returns
-    all blocks that are blue rectangels and are below any red circles
+    all blocks that are blue rectangles and are below red circles
     blocks and blocklocations: two lists of blocks  
     position: 'u' for under or 'o' for over
     """
     fulfill = []
+    fulfill2 = []
     if position == "u":
         for b1 in blocks:
             for b2 in blocklocations:
                 if b1.y > b2.y:
                     fulfill.append(b1)
+                    fulfill2.append(b1)
+                    fulfill2.append(b2)
+        
     elif position == "o":
         for b1 in blocks:
             for b2 in blocklocations:
                 if b1.y < b2.y:
                     fulfill.append(b2)
-    global guessed_blocks
-    guessed_blocks = fulfill
+                    fulfill2.append(b1)
+                    fulfill2.append(b2)
+
+    current_guesses = guessed_blocks.copy()
+    for bl in current_guesses:
+        if bl not in fulfill2:
+            guessed_blocks.remove(bl)
     return fulfill
     
 
@@ -109,8 +119,8 @@ def blockfilter(conditions,blocks):
             test = test and c(b)
         if test:
             fulfill.append(b)
-    global guessed_blocks
-    guessed_blocks = fulfill
+            guessed_blocks.add(b)
+        
     return fulfill
 
 
@@ -243,13 +253,13 @@ if __name__ == '__main__':
     # creates the grammar 
     gram = Grammar(gold_lexicon, rules, functions)
 
-    # creates the global variable for keeping track of which block is / blocks are the described one(s)
-    global guessed_blocks
-    guessed_blocks = []
-
     # parses all test sentences from semdata.py
     # prints the derived logical forms for each test sentence and whether the test sentence is true with respect to the example pictuer world.png
     for u in test_utterances:
+
+        # creates the global variable for keeping track of which block is / blocks are the described one(s)
+        guessed_blocks = set()
+        
         lfs = gram.gen(u)
         print("======================================================================")
         print('Utterance: {}'.format(u))
@@ -261,14 +271,12 @@ if __name__ == '__main__':
             # for the example test sentence 'there is a red triangle under a blue square' the picture object corresponding to world.png is created
             # and a png file is created and saved where the blocks that are in all_blocks_grid are marked, e.g. all blocks that are red and have shape
             # triangle and are positioned below a blue square in the grid are marked
-            if u == 'there is a red triangle under a blue square':
-                print("TEST GUESSING")
+            if u == 'there is a blue square over a red triangle':
                 from BlockPictureGenerator import * 
                 test_pic = Picture(name="test_guessing")
                 test_pic.blocks = allblocks.copy()
                 test_pic.block_n = len(test_pic.blocks)
                 test_pic.grid = all_blocks_grid
-                print(all_blocks_grid)
 
                 test_pic.draw()
                 guess = []
