@@ -83,45 +83,58 @@ def positiontest(blocks,blocklocations,position):
     position: 'u' for under or 'o' for over
     """
     fulfill = []
-    fulfill2 = []
+    #fulfill2 = []
+    checked = set()
 
     for b1 in blocks:
         for b2 in blocklocations:
+            checked.add(b1)
+            checked.add(b2)
             if position == "u":
                 if b1.y > b2.y:
                     fulfill.append(b1)
-                    fulfill2.append(b1)
-                    fulfill2.append(b2)
-
+                    checked.remove(b1)
+                    checked.remove(b2)
+                    #fulfill2.append(b1)
+                    #fulfill2.append(b2)
         
             elif position == "o":
                 if b1.y < b2.y:
                     fulfill.append(b2)
-                    fulfill2.append(b1)
-                    fulfill2.append(b2)
+                    checked.remove(b1)
+                    checked.remove(b2)
+                    #fulfill2.append(b1)
+                    #fulfill2.append(b2)
 
             elif position == "n":
                 if b1.y == b2.x+1 or b1.y == b2.x-1:
                     fulfill.append(b1)
-                    fulfill2.append(b1)
-                    fulfill2.append(b2)
+                    checked.remove(b1)
+                    checked.remove(b2)
+                    #fulfill2.append(b1)
+                    #fulfill2.append(b2)
 
             elif position == "l":
                 if b1.x < b2.x:
                     fulfill.append(b1)
-                    fulfill2.append(b1)
-                    fulfill2.append(b2)
+                    checked.remove(b1)
+                    checked.remove(b2)
+                    #fulfill2.append(b1)
+                    #fulfill2.append(b2)
 
             elif position == "r":
                 if b1.x > b2.x:
                     fulfill.append(b2)
-                    fulfill2.append(b1)
-                    fulfill2.append(b2)
-
-    current_guesses = guessed_blocks.copy()
-    for bl in current_guesses:
-        if bl not in fulfill2:
-            guessed_blocks.remove(bl)
+                    checked.remove(b1)
+                    checked.remove(b2)
+                    #fulfill2.append(b1)
+                    #fulfill2.append(b2)
+    for bl in checked:
+        guessed_blocks.remove(bl)
+    #current_guesses = guessed_blocks.copy()
+    #for bl in current_guesses:
+        #if bl not in fulfill2:
+            #guessed_blocks.remove(bl)
     return fulfill
     
 
@@ -243,12 +256,6 @@ rules = [
     ['TO','THE','TS',(0,1)],
     ['LR','TO','SIDE',(1,0)]
     
-    #['LEFT','O','LO',(1,0)],
-    #['RIGHT','O','RO'],(1,0),
-    #['LO','N','LON',(0,1)],
-    #['LON','BC','L',(0,1)],
-    #['RO','N','RON',(0,1)],
-    #['RON','BC','L',(0,1)]
     
 ]
 
@@ -271,10 +278,7 @@ functions = {
     'right':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"r")) in n)]))),
     'to':(lambda x: x),
     'the':(lambda x: x)
-    #'left':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(filter(lambda: b.x==1)) in n)]))),
-    #'right':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(filter(lambda: b.x==4)) in n)]))),
-    #'ofl':(lambda f:(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"l")) in n)])))),
-    #'ofr':(lambda f:(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"r")) in n)]))))    
+    
 }
 
 
@@ -307,7 +311,7 @@ if __name__ == '__main__':
             # for the example for the sentence 'there is a red triangle under a blue square' the picture object corresponding to world.png is created
             # and a png file is created and saved where the blocks that are in all_blocks_grid are marked, e.g. all blocks that are red and have shape
             # triangle and are positioned below a blue square in the grid are marked as well as the blue squares that are above the red triangle
-            if i == 5:
+            if i == 0:
                 from BlockPictureGenerator import * 
                 test_pic = Picture(name="test_guessing")
                 test_pic.blocks = allblocks.copy()
