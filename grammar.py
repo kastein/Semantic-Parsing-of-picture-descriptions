@@ -84,19 +84,25 @@ def positiontest(blocks,blocklocations,position):
     """
     fulfill = []
     fulfill2 = []
-    if position == "u":
-        for b1 in blocks:
-            for b2 in blocklocations:
+
+    for b1 in blocks:
+        for b2 in blocklocations:
+            if position == "u":
                 if b1.y > b2.y:
                     fulfill.append(b1)
                     fulfill2.append(b1)
                     fulfill2.append(b2)
+
         
-    elif position == "o":
-        for b1 in blocks:
-            for b2 in blocklocations:
+            elif position == "o":
                 if b1.y < b2.y:
                     fulfill.append(b2)
+                    fulfill2.append(b1)
+                    fulfill2.append(b2)
+
+            elif position == "n":
+                if b1.y == b2.x+1 or b1.y == b2.x-1:
+                    fulfill.append(b1)
                     fulfill2.append(b1)
                     fulfill2.append(b2)
 
@@ -188,13 +194,15 @@ gold_lexicon = {
     'there':[('E','exist')],
     'is':[('I','identy')],
     'are':[('I','identy')],
-    'a':[('N','range(1,int(sys.float_info.max))')],
+    'a':[('N','range(1,17)')],
     'one':[('N','[1]')],
     'two':[('N','[2]')],
     'three':[('N','[3]')],
     'under':[('U','under')],
     'over':[('U','over')],
     'and':[('AND','und')],
+    'next':[('NEXT', 'next')],
+    'to':[('TO', 'to')]
     #'of':[('O','ofl'),('O','ofr')],
     #'left':[('L','left')],
     #'right':[('R','right')]
@@ -208,11 +216,16 @@ rules = [
     ['E','N','EN',(0,1)],
     ['E','I','E',(1,0)],
     ['EN','B','V',(0,1)],
-    ['U','N','UN',(0,1)],
-    ['UN','B','L',(0,1)],
-    ['B','L','B',(1,0)],
+    ['EN','BS','V',(0,1)],
+    ['U','N','POS',(0,1)],
+    ['PP','N','POS',(0,1)],
+    ['POS','B','L',(0,1)],
+    ['POS','BS','L',(0,1)],
+    ['B','L','BS',(1,0)],
     ['V','AND','VAND',(1,0)],
     ['VAND','V','V',(0,1)],
+    ['NEXT','TO','PP',(1,0)],
+    
     #['LEFT','O','LO',(1,0)],
     #['RIGHT','O','RO'],(1,0),
     #['LO','N','LON',(0,1)],
@@ -236,6 +249,8 @@ functions = {
     'yellow':(lambda x: x+[(lambda b:b.colour=="yellow")]),
     'under':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"u")) in n)]))),
     'over':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"o")) in n)]))),
+    'next':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"n")) in n)]))),
+    'to':(lambda x: x)
     #'left':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(filter(lambda: b.x==1)) in n)]))),
     #'right':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(filter(lambda: b.x==4)) in n)]))),
     #'ofl':(lambda f:(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"l")) in n)])))),
@@ -250,12 +265,13 @@ if __name__ == '__main__':
     # Simple demo with the test data:
     from semdata import test_utterances
 
+
     # creates the grammar 
     gram = Grammar(gold_lexicon, rules, functions)
 
     # parses all test sentences from semdata.py
     # prints the derived logical forms for each test sentence and whether the test sentence is true with respect to the example pictuer world.png
-    for u in test_utterances:
+    for i,u in enumerate(test_utterances):
 
         # creates the global variable for keeping track of which block is / blocks are the described one(s)
         guessed_blocks = set()
@@ -268,10 +284,10 @@ if __name__ == '__main__':
             print('\tDenotation: {}'.format(gram.sem(lf)))
 
             # visualization of how the computer gives feedback about what it "understood"
-            # for the example test sentence 'there is a red triangle under a blue square' the picture object corresponding to world.png is created
+            # for the example for the sentence 'there is a red triangle under a blue square' the picture object corresponding to world.png is created
             # and a png file is created and saved where the blocks that are in all_blocks_grid are marked, e.g. all blocks that are red and have shape
             # triangle and are positioned below a blue square in the grid are marked as well as the blue squares that are above the red triangle
-            if u == 'there is a blue square over a red triangle':
+            if i == 2:
                 from BlockPictureGenerator import * 
                 test_pic = Picture(name="test_guessing")
                 test_pic.blocks = allblocks.copy()
