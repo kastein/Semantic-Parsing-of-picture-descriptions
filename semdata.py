@@ -46,8 +46,18 @@ test_utterances = [
     'there are three blue forms',
     'there is one blue form',
     'there is a red triangle and there is a blue triangle',
-    'there is a blue square over a red triangle'
+    'there is a blue square over a red triangle',
+    'there is a blue square over a yellow square over a red triangle'
 ]
+
+test_utterancess = [
+    'there is a blue square next to a blue square',
+    'there is a blue square over a yellow square over a blue triangle',
+    'there is a red triangle under a blue triangle under a blue square',
+    'there is a red triangle under a yellow square under a blue triangle',
+    'there is a yellow square to the left of a blue triangle',
+    'there is a yellow square to the right of a blue triangle'
+    ]
 
 
 # This is a list of triples (x, y, d), where x is an input string, y

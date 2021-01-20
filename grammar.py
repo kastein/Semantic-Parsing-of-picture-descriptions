@@ -106,6 +106,18 @@ def positiontest(blocks,blocklocations,position):
                     fulfill2.append(b1)
                     fulfill2.append(b2)
 
+            elif position == "l":
+                if b1.x < b2.x:
+                    fulfill.append(b1)
+                    fulfill2.append(b1)
+                    fulfill2.append(b2)
+
+            elif position == "r":
+                if b1.x > b2.x:
+                    fulfill.append(b2)
+                    fulfill2.append(b1)
+                    fulfill2.append(b2)
+
     current_guesses = guessed_blocks.copy()
     for bl in current_guesses:
         if bl not in fulfill2:
@@ -202,10 +214,12 @@ gold_lexicon = {
     'over':[('U','over')],
     'and':[('AND','und')],
     'next':[('NEXT', 'next')],
-    'to':[('TO', 'to')]
-    #'of':[('O','ofl'),('O','ofr')],
-    #'left':[('L','left')],
-    #'right':[('R','right')]
+    'to':[('TO', 'to')],
+    'of':[('TO', 'to')],
+    'left':[('LR', 'left')],
+    'right':[('LR', 'right')],
+    'the':[('THE', 'the')]
+
 }
 
 # The binarized rule set for our pictures
@@ -225,6 +239,9 @@ rules = [
     ['V','AND','VAND',(1,0)],
     ['VAND','V','V',(0,1)],
     ['NEXT','TO','PP',(1,0)],
+    ['TS','SIDE','PP',(0,1)],
+    ['TO','THE','TS',(0,1)],
+    ['LR','TO','SIDE',(1,0)]
     
     #['LEFT','O','LO',(1,0)],
     #['RIGHT','O','RO'],(1,0),
@@ -250,7 +267,10 @@ functions = {
     'under':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"u")) in n)]))),
     'over':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"o")) in n)]))),
     'next':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"n")) in n)]))),
-    'to':(lambda x: x)
+    'left':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"l")) in n)]))),
+    'right':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"r")) in n)]))),
+    'to':(lambda x: x),
+    'the':(lambda x: x)
     #'left':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(filter(lambda: b.x==1)) in n)]))),
     #'right':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(filter(lambda: b.x==4)) in n)]))),
     #'ofl':(lambda f:(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"l")) in n)])))),
@@ -287,7 +307,7 @@ if __name__ == '__main__':
             # for the example for the sentence 'there is a red triangle under a blue square' the picture object corresponding to world.png is created
             # and a png file is created and saved where the blocks that are in all_blocks_grid are marked, e.g. all blocks that are red and have shape
             # triangle and are positioned below a blue square in the grid are marked as well as the blue squares that are above the red triangle
-            if i == 2:
+            if i == 5:
                 from BlockPictureGenerator import * 
                 test_pic = Picture(name="test_guessing")
                 test_pic.blocks = allblocks.copy()
