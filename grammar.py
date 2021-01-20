@@ -93,40 +93,55 @@ def positiontest(blocks,blocklocations,position):
             if position == "u":
                 if b1.y > b2.y:
                     fulfill.append(b1)
-                    checked.remove(b1)
-                    checked.remove(b2)
+                    try:
+                        checked.remove(b1)
+                        checked.remove(b2)
+                    except:
+                        continue
                     #fulfill2.append(b1)
                     #fulfill2.append(b2)
         
             elif position == "o":
                 if b1.y < b2.y:
                     fulfill.append(b2)
-                    checked.remove(b1)
-                    checked.remove(b2)
+                    try:
+                        checked.remove(b1)
+                        checked.remove(b2)
+                    except:
+                        continue
                     #fulfill2.append(b1)
                     #fulfill2.append(b2)
 
             elif position == "n":
                 if b1.y == b2.x+1 or b1.y == b2.x-1:
                     fulfill.append(b1)
-                    checked.remove(b1)
-                    checked.remove(b2)
+                    try:
+                        checked.remove(b1)
+                        checked.remove(b2)
+                    except:
+                        continue
                     #fulfill2.append(b1)
                     #fulfill2.append(b2)
 
             elif position == "l":
                 if b1.x < b2.x:
                     fulfill.append(b1)
-                    checked.remove(b1)
-                    checked.remove(b2)
+                    try:
+                        checked.remove(b1)
+                        checked.remove(b2)
+                    except:
+                        continue
                     #fulfill2.append(b1)
                     #fulfill2.append(b2)
 
             elif position == "r":
                 if b1.x > b2.x:
                     fulfill.append(b2)
-                    checked.remove(b1)
-                    checked.remove(b2)
+                    try:
+                        checked.remove(b1)
+                        checked.remove(b2)
+                    except:
+                        continue
                     #fulfill2.append(b1)
                     #fulfill2.append(b2)
     for bl in checked:
@@ -306,6 +321,10 @@ if __name__ == '__main__':
         for lf in lfs:
             print("\tLF: {}".format(lf))
             print('\tDenotation: {}'.format(gram.sem(lf)))
+
+            # if utterance doesn't describe sentence not blocks should be guessed at all
+            if gram.sem(lf) == False:
+                guessed_blocks = set()
 
             # visualization of how the computer gives feedback about what it "understood"
             # for the example for the sentence 'there is a red triangle under a blue square' the picture object corresponding to world.png is created
