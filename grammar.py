@@ -329,18 +329,18 @@ if __name__ == '__main__':
             # for the example for the sentence 'there is a red triangle under a blue square' the picture object corresponding to world.png is created
             # and a png file is created and saved where the blocks that are in all_blocks_grid are marked, e.g. all blocks that are red and have shape
             # triangle and are positioned below a blue square in the grid are marked as well as the blue squares that are above the red triangle
-            if i == 0:
-                from BlockPictureGenerator import * 
-                test_pic = Picture(name="test_guessing")
-                test_pic.blocks = allblocks.copy()
-                test_pic.block_n = len(test_pic.blocks)
-                test_pic.grid = all_blocks_grid
+            
+            from BlockPictureGenerator import * 
+            test_pic = Picture(name = "./marked_pictures/" + u)
+            test_pic.blocks = allblocks.copy()
+            test_pic.block_n = len(test_pic.blocks)
+            test_pic.grid = all_blocks_grid
 
-                test_pic.draw()
-                guess = []
-                for b in guessed_blocks:
-                    guess.append((b.y, b.x))
-                test_pic.mark(guess)
+            test_pic.draw()
+            guess = []
+            for b in guessed_blocks:
+                guess.append((b.y, b.x))
+            test_pic.mark(guess)
 
 
                 
