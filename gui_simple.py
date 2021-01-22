@@ -16,6 +16,9 @@ starting_screen = [
 
 game_screen = [
     [
+        sg.Text("Level 0, Picture 0:", key="-LEVEL-")
+    ],
+    [
         sg.Image(key="-IMAGE-")  # try to read in jpg.files
     ],
     [
@@ -46,11 +49,21 @@ layout_game_screen = [
 ]
 
 start = sg.Window("Hello!", layout_starting_screen)
-actualgame = sg.Window("My Program", layout_game_screen)
+actualgame = sg.Window("Language Game", layout_game_screen)
 window = start
-#window = actualgame
 
-inpt = None
+level = 1
+i_picture = 1
+session_name = "pictures"
+
+
+def picture_path(level, i_picture, session_name="pictures"):
+    file_name = session_name + "_L" + str(level) + "_" + str(i_picture) + ".png"
+    path_pict = "./" + session_name + "/" + file_name
+    return path_pict
+
+
+inpt = ""
 
 while True:
     event, values = window.read()
@@ -63,21 +76,25 @@ while True:
     if event == "-START-":
         window.close()
         window = actualgame
+        #startpic = True
+        #window.read()
         #event, values = window.read()
         #picture = Picture(name="guitest").draw()
         #window["-IMAGE-"].update(filename="guitest.png")
         #continue
 
+
     # Displaying picture and taking input
     if event == "-NEXT-":
-        picture = setPicParameters(1, 1, "pictures")
-        picture.draw()
-        #picture = Picture(name="guitest").draw()
-        # change later
-        file_name = "pictures" + "_L" + str(1) + "_" + str(1) + ".png"
-        path_pict = "./" + "pictures" + "/" + file_name
-        window["-IMAGE-"].update(filename=path_pict)
+        picture = setPicParameters(level, i_picture, session_name).draw()
+        window["-IMAGE-"].update(filename=picture_path(level, i_picture))
         window["-INSTRUCTION-"].update("Describe the picture:")
+        window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
+        if i_picture >= 10:
+            i_picture = 0
+            level += 1
+        i_picture += 1
+
 
     if event == "-INPUT-":
         inpt = values["-INPUT-"]
