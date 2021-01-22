@@ -37,5 +37,5 @@ two = Block("blue","rectangle")
 three = Block("blue","triangle")
 four = Block("yellow","rectangle")
 five = Block("red","triangle")
-allblocks = [[None,one,two,None],[three,None,None,four],[None,five,None,None],[None,None,None,None]]
-set_all_coordinates(allblocks)
+allblocks_test = [[None,one,two,None],[three,None,None,four],[None,five,None,None],[None,None,None,None]]
+set_all_coordinates(allblocks_test)

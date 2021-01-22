@@ -60,19 +60,22 @@ from itertools import product
 from world import *
 
 
-# allblocks are the the blocks from world.py and world.jpg that get used as an example here
-# all_blocks_grid is needed later to create the Picture Object corresponding to the picutre in world.jpg
-all_blocks_grid = allblocks.copy()
 
-# a list of all blocks that is used for evaluating the truth of the descriptions (doesn't include None anymore)
-allblocks2 = []
-for row in allblocks:
-    for blo in row:
-        if blo:
-            allblocks2.append(blo)
-allblocks=allblocks2
+allblocks = []
 guessed_blocks = set()
+all_blocks_grid = []
 
+
+
+def create_all_blocks(picture):
+    grid = picture.grid
+    all_blocks_grid = grid.copy()
+    for row in grid:
+        for b in row:
+            if b:
+                allblocks.append(b)            
+    return None
+    
 
 def positiontest(blocks,blocklocations,position):
     """
@@ -83,7 +86,6 @@ def positiontest(blocks,blocklocations,position):
     position: 'u' for under or 'o' for over
     """
     fulfill = []
-    #fulfill2 = []
     checked = set()
 
     for b1 in blocks:
@@ -98,9 +100,7 @@ def positiontest(blocks,blocklocations,position):
                         checked.remove(b2)
                     except:
                         continue
-                    #fulfill2.append(b1)
-                    #fulfill2.append(b2)
-        
+
             elif position == "o":
                 if b1.y < b2.y:
                     fulfill.append(b2)
@@ -109,8 +109,6 @@ def positiontest(blocks,blocklocations,position):
                         checked.remove(b2)
                     except:
                         continue
-                    #fulfill2.append(b1)
-                    #fulfill2.append(b2)
 
             elif position == "n":
                 if b1.y == b2.x+1 or b1.y == b2.x-1:
@@ -120,9 +118,6 @@ def positiontest(blocks,blocklocations,position):
                         checked.remove(b2)
                     except:
                         continue
-                    #fulfill2.append(b1)
-                    #fulfill2.append(b2)
-
             elif position == "l":
                 if b1.x < b2.x:
                     fulfill.append(b1)
@@ -131,9 +126,7 @@ def positiontest(blocks,blocklocations,position):
                         checked.remove(b2)
                     except:
                         continue
-                    #fulfill2.append(b1)
-                    #fulfill2.append(b2)
-
+                    
             elif position == "r":
                 if b1.x > b2.x:
                     fulfill.append(b2)
@@ -142,14 +135,10 @@ def positiontest(blocks,blocklocations,position):
                         checked.remove(b2)
                     except:
                         continue
-                    #fulfill2.append(b1)
-                    #fulfill2.append(b2)
+
     for bl in checked:
         guessed_blocks.remove(bl)
-    #current_guesses = guessed_blocks.copy()
-    #for bl in current_guesses:
-        #if bl not in fulfill2:
-            #guessed_blocks.remove(bl)
+        
     return fulfill
     
 
@@ -218,6 +207,8 @@ class Grammar:
         return eval(lf[0][1]) # Interpret just the root node's semantics. 
 
 # The lexicon for our pictures 
+
+
 gold_lexicon = {
     'form':[('B','[]')],
     'forms':[('B','[]')],
@@ -276,7 +267,6 @@ rules = [
 
 # These are needed to interpret our logical forms with eval. They are
 # imported into the namespace Grammar.sem to achieve that.
-# so far only above and under are working, we are going to add left and right also
 functions = {
     'block': (lambda conditions: (lambda number_requirement: (number_requirement,conditions))),
     'identy': (lambda x: x),
@@ -297,7 +287,7 @@ functions = {
 }
 
 
-
+# Main is used for testing the gramamr with the test sentences from semdata.py 
 
 if __name__ == '__main__':
 
@@ -307,6 +297,15 @@ if __name__ == '__main__':
 
     # creates the grammar 
     gram = Grammar(gold_lexicon, rules, functions)
+
+    # use picture from world.png and world.py for testing purpose
+    allblocks2 = []
+    all_blocks_grid = allblocks_test.copy()
+    for row in allblocks_test:
+        for blo in row:
+            if blo:
+                allblocks2.append(blo)
+    allblocks=allblocks2
 
     # parses all test sentences from semdata.py
     # prints the derived logical forms for each test sentence and whether the test sentence is true with respect to the example pictuer world.png
