@@ -23,7 +23,7 @@ game_screen = [
     ],
     [
         #sg.Text("What is in the picture?", key="-INSTRUCTION-"),
-        sg.Button("show next picture", key="-NEXT-")
+        sg.Button("Press here to show first picture", key="-NEXT-")
     ],
     [
         sg.Text("Describe the picture:", key="-INSTRUCTION-"), # store what is being typed, when person hits enter
@@ -53,12 +53,15 @@ actualgame = sg.Window("Language Game", layout_game_screen)
 window = start
 
 level = 1
-i_picture = 1
+i_picture = 0
 session_name = "pictures"
 
 
-def picture_path(level, i_picture, session_name="pictures"):
-    file_name = session_name + "_L" + str(level) + "_" + str(i_picture) + ".png"
+def picture_path(level, i_picture, session_name="pictures", guess=False):
+    if not guess:
+        file_name = session_name + "_L" + str(level) + "_" + str(i_picture) + ".png"
+    else:
+        file_name = session_name + "_L" + str(level) + "_" + str(i_picture) + "_guess.png"
     path_pict = "./" + session_name + "/" + file_name
     return path_pict
 
@@ -76,24 +79,20 @@ while True:
     if event == "-START-":
         window.close()
         window = actualgame
-        #startpic = True
-        #window.read()
-        #event, values = window.read()
-        #picture = Picture(name="guitest").draw()
-        #window["-IMAGE-"].update(filename="guitest.png")
-        #continue
 
 
     # Displaying picture and taking input
     if event == "-NEXT-":
-        picture = setPicParameters(level, i_picture, session_name).draw()
-        window["-IMAGE-"].update(filename=picture_path(level, i_picture))
-        window["-INSTRUCTION-"].update("Describe the picture:")
-        window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
         if i_picture >= 10:
             i_picture = 0
             level += 1
         i_picture += 1
+        window["-NEXT-"].update("Show next picture")
+        current_pic = setPicParameters(level, i_picture, session_name)
+        current_pic.draw()
+        window["-IMAGE-"].update(filename=picture_path(level, i_picture))
+        window["-INSTRUCTION-"].update("Describe the picture:")
+        window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
 
 
     if event == "-INPUT-":
@@ -102,6 +101,7 @@ while True:
     if event == "-ENTER-":
         inpt = inpt.lower()
         print(inpt)
+
         # here go into semantic parser
         lfs = gram.gen(inpt)
         for lf in lfs:
@@ -111,13 +111,17 @@ while True:
         guess = []
         for b in guessed_blocks:
             guess.append((b.y, b.x))
-        Picture(name="guitest").mark(guess)
+
+        # mark the guessed blocks in the picture
+        #print(current_pic)
+        current_pic.mark(guess)
         window["-INSTRUCTION-"].update("Did you refer to this?")
-        #picture = Picture(name="guitest").mark([(1,1)])
-        window["-IMAGE-"].update(filename="guitest_guess.png")
+        window["-IMAGE-"].update(filename=picture_path(level, i_picture, guess=True))
         window["-INPUT-"].update("")
+
     if event == "-YES-":
         window["-INSTRUCTION-"].update("Awesome!")
+
     if event == "-NO-":
         # ask for next guess from parser
         picture = Picture(name="guitest").mark([(1,2)])
