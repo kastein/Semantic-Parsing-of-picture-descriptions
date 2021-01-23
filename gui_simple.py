@@ -90,6 +90,8 @@ while True:
         window["-NEXT-"].update("Show next picture")
         current_pic = setPicParameters(level, i_picture, session_name)
         current_pic.draw()
+        # Katharina added following line
+        create_all_blocks(current_pic)
         window["-IMAGE-"].update(filename=picture_path(level, i_picture))
         window["-INSTRUCTION-"].update("Describe the picture:")
         window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
@@ -108,6 +110,9 @@ while True:
             print("\tLF: {}".format(lf))
             print('\tDenotation: {}'.format(gram.sem(lf)))
         print(guessed_blocks)
+        # Katharina added following 2 lines
+        if gram.sem(lf) == False:
+            guessed_blocks = []
         guess = []
         for b in guessed_blocks:
             guess.append((b.y, b.x))
