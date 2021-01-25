@@ -57,6 +57,7 @@ from collections import defaultdict
 from grammar import Grammar, rules, functions
 from learning import evaluate, SGD, LatentSGD
 import semdata
+import nltk
 
 
 def phi_sem(x, y):
@@ -88,23 +89,24 @@ def leaves(x):
 
 # This crude lexicon is the starting point for learning; it respects
 # typing but nothing else:
+pos_rules = dict()
+pos_rules['NN'] = [('LR', 'right'),('LR', 'left'),('B','[]'),('B','[(lambda b: b.shape == "rectangle")]'),('B','[(lambda b: b.shape == "triangle")]'),('B','[(lambda b: b.shape == "circle")]'),('LR', 'left'),('LR', 'right')]
+pos_rules['NNS'] = [('LR', 'right'),('LR', 'left'),('B','[]'),('B','[(lambda b: b.shape == "rectangle")]'),('B','[(lambda b: b.shape == "triangle")]'),('B','[(lambda b: b.shape == "circle")]'),('LR', 'left'),('LR', 'right')]
+pos_rules['EX']=[('E','exist')]
+pos_rules['VBP']=[('I','identy')]
+pos_rules['VBZ']=[('I','identy')]
+pos_rules['TO']= [('TO', 'to')]
+pos_rules['IN'] = [('TO', 'to'),('U','over'),('U','under')]
+pos_rules['DT'] = [('THE', 'the'),('N','range(1,17)')]
+pos_rules['CC'] = [('AND','und')]
+pos_rules['CD'] = [('N','[1]'),('N','[2]'),('N','[3]')]
+pos_rules['JJ'] = [('C','green'),('C','yellow'),('C','blue'),('C','red'),('NEXT', 'next')]
+
 crude_lexicon = {}
-crude_lexicon = {}
-# numbers
-for word in ['a', 'one','two', 'three']:
-    crude_lexicon[word] = [('N','range(1,int(sys.float_info.max))'),('N','[1]'),('N','[2]'),('N','[3]')]
-# colours
-for word in ['blue','green','yellow','red']:
-    crude_lexicon[word] = [('C','green'),('C','yellow'),('C','red'),('C','blue')]
-# shapes
-for word in ['form','forms','square','squares','triangle','triangles','circle','circles']:
-    crude_lexicon[word] = [('B','[]'),('B','[(lambda b: b.shape == "rectangle")]'),('B','[(lambda b: b.shape == "triangle")]'),('B','[(lambda b: b.shape == "circle")]')]
-# locations
-for word in ['over','under']:
-    crude_lexicon[word] = [('U','under'),('U','over')]
-# rest of the words
-for word in ['there','is','are','and']:
-    crude_lexicon[word] = [('I','identy'),('AND','und'),('E','exist')]
+for utterance in semdata.train_utterances+semdata.test_utterances:
+    for word,pos in nltk.pos_tag(nltk.word_tokenize(utterance)):
+        crude_lexicon[word]=pos_rules[pos]
+    
 
 # no matter which language, but then we will get a memory error
 #for word in ('form','square','squares','triangle','triangles','circle','circles','green','yellow','blue','red','there','is','are','a','one','two','under','over','and','one','a','two','three'):
