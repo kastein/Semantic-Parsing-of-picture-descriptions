@@ -32,14 +32,13 @@ def set_all_coordinates(chart):
     
 
 
-"""one = Block("blue","rectangle")
+one = Block("blue","rectangle")
 two = Block("blue","rectangle")
 three = Block("blue","triangle")
 four = Block("yellow","rectangle")
 five = Block("red","triangle")
 
-allblocks_test = [[None,one,two,None],[three,None,None,four],[None,five,None,None],[None,None,None,None]]
-set_all_coordinates(allblocks_test)"""
+world = [[None,one,two,None],[three,None,None,four],[None,five,None,None],[None,None,None,None]]
 
 one = Block("red","triangle")
 two = Block("blue","circle")
@@ -58,7 +57,12 @@ fourteen = Block("green","circle")
 fivteen = Block("yellow","circle")
 sixteen = Block("blue","triangle")
 
-allblocks_test = [[one,two,three,four],[five,six,seven,eight],[nine,ten,eleven,twelve],[thirteen,fourteen,fivteen,sixteen]]
+world2 = [[one,two,three,four],[five,six,seven,eight],[nine,ten,eleven,twelve],[thirteen,fourteen,fivteen,sixteen]]
+
+
+# choose which example picture you would like to use
+# allblocks = world
+allblocks = world2
 set_all_coordinates(allblocks_test)
 
 
