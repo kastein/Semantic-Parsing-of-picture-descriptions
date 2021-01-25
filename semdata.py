@@ -38,6 +38,7 @@ train_utterances = [
 ]
 
 # Test:
+# Test Utterances for world.jpg
 test_utterances = [
     'there is a red triangle under a blue square',
     'there is a red circle under a blue square',
@@ -55,7 +56,44 @@ test_utterances = [
     'there is a yellow square to the left of a blue triangle',
     'there is a yellow square to the right of a blue triangle'
     ]
+# should all evaluate to true
+test_utterances = [
+    'there is a blue triangle',
+    'there is a red triangle',
+    'there is a blue square',
+    'there is a yellow square',
+    'there are two blue squares',
+    'there are three squares',
+    'there are two triangles',
+    'there is a red triangle under a blue square',
+    'there is a blue square over a yellow square',
+    'there is a yellow square next to a blue triangle',
+    'there is a blue square over a blue triangle over a red triangle'
+]
 
+# Test Utterances for world2.jpg
+# Are not yet working
+test_utterances = [
+    'there is a yellow circle over a blue circle',
+    'there is a red triangle over a yellow triangle',
+    'there is a yellow triangle under a red triangle',
+    'there is a red triangle under a yellow triangle',
+    'there is a yellow triangle over a red triangle',
+    'there is a blue triangle under a red triangle under a yellow triangle']
+
+# Are all working
+test_utterances2 = [
+    'there are three blue circles',
+    'there are two red triangles',
+    'there is a green square',
+    'there is a yellow triangle',
+    'there is a green circle over a green circle',
+    'there is a green triangle under a red circle',
+    'there is a green circle to the right of a red circle',
+    'there are two green circles under a blue circle',
+    'there is a green form next to a green form',
+    'there is a blue circle under a blue circle'
+]
 
 # This is a list of triples (x, y, d), where x is an input string, y
 # is its preferred logical form, and d is the denotation of the

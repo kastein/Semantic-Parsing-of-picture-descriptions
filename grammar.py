@@ -68,8 +68,9 @@ all_blocks_grid = []
 
 
 def create_all_blocks(picture):
+    allblocks.clear()
     grid = picture.grid
-    all_blocks_grid = grid.copy()
+    #all_blocks_grid = grid.copy()
     for row in grid:
         for b in row:
             if b:
@@ -87,6 +88,7 @@ def positiontest(blocks,blocklocations,position):
     """
     fulfill = []
     checked = set()
+    passed_check = set()
 
     for b1 in blocks:
         for b2 in blocklocations:
@@ -95,49 +97,37 @@ def positiontest(blocks,blocklocations,position):
             if position == "u":
                 if b1.y > b2.y:
                     fulfill.append(b1)
-                    try:
-                        checked.remove(b1)
-                        checked.remove(b2)
-                    except:
-                        continue
+                    passed_check.add(b1)
+                    passed_check.add(b2)
 
             elif position == "o":
                 if b1.y < b2.y:
-                    fulfill.append(b2)
-                    try:
-                        checked.remove(b1)
-                        checked.remove(b2)
-                    except:
-                        continue
-
-            elif position == "n":
-                if b1.y == b2.x+1 or b1.y == b2.x-1:
                     fulfill.append(b1)
-                    try:
-                        checked.remove(b1)
-                        checked.remove(b2)
-                    except:
-                        continue
+                    passed_check.add(b1)
+                    passed_check.add(b2)
+ 
+            elif position == "n":
+                if b1.y == b2.y and b1.x == b2.x+1 or b1.x == b2.x-1:
+                    fulfill.append(b1)
+                    passed_check.add(b1)
+                    passed_check.add(b2)
+
             elif position == "l":
                 if b1.x < b2.x:
                     fulfill.append(b1)
-                    try:
-                        checked.remove(b1)
-                        checked.remove(b2)
-                    except:
-                        continue
-                    
+                    passed_check.add(b1)
+                    passed_check.add(b2)
+ 
             elif position == "r":
                 if b1.x > b2.x:
-                    fulfill.append(b2)
-                    try:
-                        checked.remove(b1)
-                        checked.remove(b2)
-                    except:
-                        continue
+                    fulfill.append(b1)
+                    passed_check.add(b1)
+                    passed_check.add(b2)
+
 
     for bl in checked:
-        guessed_blocks.remove(bl)
+        if bl not in passed_check:
+            guessed_blocks.remove(bl)
         
     return fulfill
     
@@ -154,8 +144,8 @@ def blockfilter(conditions,blocks):
             test = test and c(b)
         if test:
             fulfill.append(b)
-            guessed_blocks.add(b)
-        
+            #guessed_blocks.add(b)
+    guessed_blocks.update(fulfill)
     return fulfill
 
 
@@ -217,7 +207,7 @@ gold_lexicon = {
     'triangle': [('B','[(lambda b: b.shape == "triangle")]')],
     'triangles': [('B','[(lambda b: b.shape == "triangle")]')],
     'circle': [('B','[(lambda b: b.shape == "circle")]')],
-    'circles': [('B','[(lambda b: b.shape == "circles")]')],
+    'circles': [('B','[(lambda b: b.shape == "circle")]')],
     'green':[('C','green')],
     'yellow':[('C','yellow')],
     'blue':[('C','blue')],
@@ -276,11 +266,11 @@ functions = {
     'red': (lambda x: x+[(lambda b:b.colour=="red")]),
     'green': (lambda x: x+[(lambda b:b.colour=="green")]),
     'yellow':(lambda x: x+[(lambda b:b.colour=="yellow")]),
-    'under':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"u")) in n)]))),
-    'over':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"o")) in n)]))),
-    'next':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"n")) in n)]))),
-    'left':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"l")) in n)]))),
-    'right':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"r")) in n)]))),
+    'under':(lambda n: (lambda x:(lambda y: [(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"u")) in n and b in positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"u"))]))),
+    'over':(lambda n: (lambda x:(lambda y: [(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"o")) in n and b in positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"o"))]))),
+    'next':(lambda n: (lambda x:(lambda y: [(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"n")) in n and b in positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"n"))]))),
+    'left':(lambda n: (lambda x:(lambda y: [(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"l")) in n and b in positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"l"))]))),
+    'right':(lambda n: (lambda x:(lambda y: [(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"r")) in n and b in positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"r"))]))),
     'to':(lambda x: x),
     'the':(lambda x: x)
     
