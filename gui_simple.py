@@ -26,8 +26,8 @@ game_screen = [
     ],
     [
         sg.Text("Describe the picture:", key="-INSTRUCTION-"), # store what is being typed, when person hits enter
-        sg.In(size=(25, 1), enable_events=True, key="-INPUT-"),
-        sg.Button("Enter", key="-ENTER-")
+        sg.In(size=(25, 1), enable_events=True, key="-INPUT-", disabled=True),
+        sg.Button("Enter", key="-ENTER-", visible=False)
     ],
     [
         sg.Text("Did you refer to this?"),
@@ -66,6 +66,9 @@ def picture_path(level, i_picture, session_name="pictures", guess=False):
     path_pict = "./" + session_name + "/" + file_name
     return path_pict
 
+with open("evaluation.csv", "w", encoding="utf-8") as f:
+    first_line = "picture\tinput\tmarked_picture\tresponse\n"
+    f.writelines(first_line)
 
 inpt = ""
 
@@ -86,6 +89,8 @@ while True:
         # hiding and unhiding
         window["-NEXT-"].hide_row()
         window["-YES-"].hide_row()
+        window["-INPUT-"].update(disabled=False)
+        window["-ENTER-"].update(visible=True)
 
         if i_picture >= 10:
             i_picture = 0
@@ -96,6 +101,7 @@ while True:
         # Katharina added following line
         create_all_blocks(current_pic)
         window["-IMAGE-"].update(filename=picture_path(level, i_picture))
+        eval_picture = str(picture_path(level, i_picture))
         window["-INSTRUCTION-"].update("Describe the picture:")
         window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
 
@@ -109,8 +115,10 @@ while True:
 
         inpt = inpt.lower()
         print(inpt)
+        eval_input = inpt
 
         # here go into semantic parser
+        #guessed_blocks = []
         lfs = gram.gen(inpt)
         for lf in lfs:
             print("\tLF: {}".format(lf))
@@ -128,11 +136,18 @@ while True:
         current_pic.mark(guess)
         window["-IMAGE-"].update(filename=picture_path(level, i_picture, guess=True))
         window["-INPUT-"].update("")
+        #guessed_blocks = []
+        eval_marked_picture = str(picture_path(level, i_picture, guess=True))
 
     if event == "-YES-":
         # hiding and unhiding
         window["-YES-"].hide_row()
         window["-ENTER-"].unhide_row()
+
+        eval_response = "yes"
+        with open("evaluation.csv", "a", encoding="utf-8") as f:
+            line = eval_picture + "\t" + eval_input + "\t" + eval_marked_picture + "\t" + eval_response + "\n"
+            f.writelines(line)
 
         if i_picture >= 10:
             i_picture = 0
@@ -143,9 +158,17 @@ while True:
         # Katharina added following line
         create_all_blocks(current_pic)
         window["-IMAGE-"].update(filename=picture_path(level, i_picture))
+        eval_picture = str(picture_path(level, i_picture))
         window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
 
     if event == "-NO-":
+        # hiding and unhiding
+        # yet to come
+
+        eval_response = "no"
+        with open("evaluation.csv", "a", encoding="utf-8") as f:
+            line = eval_picture + "\t" + eval_input + "\t" + eval_marked_picture + "\t" + eval_response + "\n"
+            f.writelines(line)
         # ask for next guess from parser
         picture = Picture(name="guitest").mark([(1,2)])
         window["-IMAGE-"].update(filename="guitest_guess.png")
