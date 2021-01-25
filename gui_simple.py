@@ -19,11 +19,10 @@ game_screen = [
         sg.Text("Level 0, Picture 0:", key="-LEVEL-")
     ],
     [
-        sg.Image(key="-IMAGE-")  # try to read in jpg.files
+        sg.Button("Press here to show first picture", key="-NEXT-")
     ],
     [
-        #sg.Text("What is in the picture?", key="-INSTRUCTION-"),
-        sg.Button("Press here to show first picture", key="-NEXT-")
+        sg.Image(key="-IMAGE-")  # try to read in jpg.files
     ],
     [
         sg.Text("Describe the picture:", key="-INSTRUCTION-"), # store what is being typed, when person hits enter
@@ -31,10 +30,12 @@ game_screen = [
         sg.Button("Enter", key="-ENTER-")
     ],
     [
+        sg.Text("Did you refer to this?"),
         sg.Button("YES", key="-YES-"),
         sg.Button("NO", key="-NO-")
     ]
 ]
+
 
 layout_starting_screen = [
     [
@@ -49,7 +50,7 @@ layout_game_screen = [
 ]
 
 start = sg.Window("Hello!", layout_starting_screen)
-actualgame = sg.Window("Language Game", layout_game_screen)
+actualgame = sg.Window("Language Game", layout_game_screen, return_keyboard_events=True)
 window = start
 
 level = 1
@@ -80,14 +81,16 @@ while True:
         window.close()
         window = actualgame
 
-
     # Displaying picture and taking input
     if event == "-NEXT-":
+        # hiding and unhiding
+        window["-NEXT-"].hide_row()
+        window["-YES-"].hide_row()
+
         if i_picture >= 10:
             i_picture = 0
             level += 1
         i_picture += 1
-        window["-NEXT-"].update("Show next picture")
         current_pic = setPicParameters(level, i_picture, session_name)
         current_pic.draw()
         # Katharina added following line
@@ -96,11 +99,14 @@ while True:
         window["-INSTRUCTION-"].update("Describe the picture:")
         window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
 
-
     if event == "-INPUT-":
         inpt = values["-INPUT-"]
 
     if event == "-ENTER-":
+        # hiding and unhiding
+        window["-ENTER-"].hide_row()
+        window["-YES-"].unhide_row()
+
         inpt = inpt.lower()
         print(inpt)
 
@@ -109,23 +115,35 @@ while True:
         for lf in lfs:
             print("\tLF: {}".format(lf))
             print('\tDenotation: {}'.format(gram.sem(lf)))
-        print(guessed_blocks)
+        #print(guessed_blocks)
         # Katharina added following 2 lines
         if gram.sem(lf) == False:
             guessed_blocks = []
         guess = []
         for b in guessed_blocks:
             guess.append((b.y, b.x))
-
+        print(guessed_blocks)
         # mark the guessed blocks in the picture
         #print(current_pic)
         current_pic.mark(guess)
-        window["-INSTRUCTION-"].update("Did you refer to this?")
         window["-IMAGE-"].update(filename=picture_path(level, i_picture, guess=True))
         window["-INPUT-"].update("")
 
     if event == "-YES-":
-        window["-INSTRUCTION-"].update("Awesome!")
+        # hiding and unhiding
+        window["-YES-"].hide_row()
+        window["-ENTER-"].unhide_row()
+
+        if i_picture >= 10:
+            i_picture = 0
+            level += 1
+        i_picture += 1
+        current_pic = setPicParameters(level, i_picture, session_name)
+        current_pic.draw()
+        # Katharina added following line
+        create_all_blocks(current_pic)
+        window["-IMAGE-"].update(filename=picture_path(level, i_picture))
+        window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
 
     if event == "-NO-":
         # ask for next guess from parser
