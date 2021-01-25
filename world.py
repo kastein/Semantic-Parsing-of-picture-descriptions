@@ -61,8 +61,8 @@ world2 = [[one,two,three,four],[five,six,seven,eight],[nine,ten,eleven,twelve],[
 
 
 # choose which example picture you would like to use
-# allblocks = world
-allblocks = world2
+# allblocks_test = world
+allblocks_test = world2
 set_all_coordinates(allblocks_test)
 
 
