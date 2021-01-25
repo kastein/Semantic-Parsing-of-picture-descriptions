@@ -67,7 +67,7 @@ def picture_path(level, i_picture, session_name="pictures", guess=False):
     return path_pict
 
 with open("evaluation.csv", "w", encoding="utf-8") as f:
-    first_line = "picture\tinput\tmarked_picture\tresponse\n"
+    first_line = "picture,input,marked_picture,response\n"
     f.writelines(first_line)
 
 inpt = ""
@@ -126,17 +126,17 @@ while True:
         #print(guessed_blocks)
         # Katharina added following 2 lines
         if gram.sem(lf) == False:
-            guessed_blocks = []
+            guessed_blocks.clear()
         guess = []
         for b in guessed_blocks:
             guess.append((b.y, b.x))
         print(guessed_blocks)
+        guessed_blocks.clear()
+
         # mark the guessed blocks in the picture
-        #print(current_pic)
         current_pic.mark(guess)
         window["-IMAGE-"].update(filename=picture_path(level, i_picture, guess=True))
         window["-INPUT-"].update("")
-        #guessed_blocks = []
         eval_marked_picture = str(picture_path(level, i_picture, guess=True))
 
     if event == "-YES-":
@@ -146,7 +146,7 @@ while True:
 
         eval_response = "yes"
         with open("evaluation.csv", "a", encoding="utf-8") as f:
-            line = eval_picture + "\t" + eval_input + "\t" + eval_marked_picture + "\t" + eval_response + "\n"
+            line = eval_picture + "," + eval_input + "," + eval_marked_picture + "," + eval_response + "\n"
             f.writelines(line)
 
         if i_picture >= 10:
@@ -167,7 +167,7 @@ while True:
 
         eval_response = "no"
         with open("evaluation.csv", "a", encoding="utf-8") as f:
-            line = eval_picture + "\t" + eval_input + "\t" + eval_marked_picture + "\t" + eval_response + "\n"
+            line = eval_picture + "," + eval_input + "," + eval_marked_picture + "," + eval_response + "\n"
             f.writelines(line)
         # ask for next guess from parser
         picture = Picture(name="guitest").mark([(1,2)])
