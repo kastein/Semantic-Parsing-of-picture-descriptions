@@ -56,7 +56,7 @@ import re
 from collections import defaultdict
 from grammar_TEST import Grammar, rules, functions
 from learning import evaluate, SGD, LatentSGD
-import semdata
+import semdata_TEST as semdata
 
 
 def phi_sem(x, y):
@@ -107,8 +107,8 @@ for word in ['there','is','are','and']:
     crude_lexicon[word] = [('I','identy'),('AND','und'),('E','exist')]
 """
 # no matter which language, but then we will get a memory error
-for word in ('form','square','squares','triangle','triangles','circle','circles','green','yellow','blue','red','there','is','are','under','over','and','one','a','two','three'):
-    crude_lexicon[word] = [('B','[]'),('B','[(lambda b: b.shape == "rectangle")]'),('B','[(lambda b: b.shape == "triangle")]'),('B','[(lambda b: b.shape == "circle")]'),('C','green'),('C','yellow'),('C','blue'),('C','red'),('E','exist'),('I','identy'),('N','range(1,17)'),('N','[1]'),('U','under'),('U','over'),('AND','und')]
+for word in ('the','next','to','of','left','right','form','square','squares','triangle','triangles','circle','circles','green','yellow','blue','red','there','is','are','under','over','and','one','a','two','three'):
+    crude_lexicon[word] = [('THE', 'the'),('LR', 'right'),('LR', 'left'),('TO', 'to'),('NEXT', 'next'),('B','[]'),('B','[(lambda b: b.shape == "rectangle")]'),('B','[(lambda b: b.shape == "triangle")]'),('B','[(lambda b: b.shape == "circle")]'),('C','green'),('C','yellow'),('C','blue'),('C','red'),('E','exist'),('I','identy'),('N','range(1,17)'),('N','[1]'),('U','under'),('U','over'),('AND','und')]
 
 
 # Our crude grammar, the starting point for learning. rules and
@@ -184,6 +184,6 @@ def evaluate_latent_semparse():
 if __name__ == '__main__':
 
     evaluate_semparse()
-    evaluate_interpretive()
+    #evaluate_interpretive()
     #evaluate_latent_semparse()
 

@@ -22,12 +22,12 @@ gram = Grammar(gold_lexicon, rules, functions)
 
 # Train/test data for the demo:
 train_utterances = [
-    'there is a triangle'
+    'there is a blue square next to a square'
 ]
 
 # Test:
 test_utterances = [
-    'there are two blue squares',
+    'there is a blue square next to a blue square'
     
 ]
 

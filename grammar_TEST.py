@@ -62,16 +62,20 @@ from world import *
 
 # allblocks are the the blocks from world.py and world.jpg that get used as an example here
 # all_blocks_grid is needed later to create the Picture Object corresponding to the picutre in world.jpg
-all_blocks_grid = allblocks.copy()
+
+allblocks = []
+guessed_blocks = set()
+all_blocks_grid = []
 
 # a list of all blocks that is used for evaluating the truth of the descriptions (doesn't include None anymore)
-allblocks2 = []
-for row in allblocks:
-    for blo in row:
-        if blo:
-            allblocks2.append(blo)
-allblocks=allblocks2
-guessed_blocks = set()
+def create_all_blocks(picture):
+    grid = picture.grid
+    all_blocks_grid = grid.copy()
+    for row in grid:
+        for b in row:
+            if b:
+                allblocks.append(b)            
+    return None
 
 
 def positiontest(blocks,blocklocations,position):
@@ -83,29 +87,60 @@ def positiontest(blocks,blocklocations,position):
     position: 'u' for under or 'o' for over
     """
     fulfill = []
-    fulfill2 = []
-    if position == "u":
-        for b1 in blocks:
-            for b2 in blocklocations:
+    checked = set()
+
+    for b1 in blocks:
+        for b2 in blocklocations:
+            checked.add(b1)
+            checked.add(b2)
+            if position == "u":
                 if b1.y > b2.y:
                     fulfill.append(b1)
-                    fulfill2.append(b1)
-                    fulfill2.append(b2)
-        
-    elif position == "o":
-        for b1 in blocks:
-            for b2 in blocklocations:
+                    try:
+                        checked.remove(b1)
+                        checked.remove(b2)
+                    except:
+                        continue
+
+            elif position == "o":
                 if b1.y < b2.y:
                     fulfill.append(b2)
-                    fulfill2.append(b1)
-                    fulfill2.append(b2)
+                    try:
+                        checked.remove(b1)
+                        checked.remove(b2)
+                    except:
+                        continue
 
-    current_guesses = guessed_blocks.copy()
-    for bl in current_guesses:
-        if bl not in fulfill2:
-            guessed_blocks.remove(bl)
+            elif position == "n":
+                if b1.y == b2.x+1 or b1.y == b2.x-1:
+                    fulfill.append(b1)
+                    try:
+                        checked.remove(b1)
+                        checked.remove(b2)
+                    except:
+                        continue
+            elif position == "l":
+                if b1.x < b2.x:
+                    fulfill.append(b1)
+                    try:
+                        checked.remove(b1)
+                        checked.remove(b2)
+                    except:
+                        continue
+                    
+            elif position == "r":
+                if b1.x > b2.x:
+                    fulfill.append(b2)
+                    try:
+                        checked.remove(b1)
+                        checked.remove(b2)
+                    except:
+                        continue
+
+    for bl in checked:
+        guessed_blocks.remove(bl)
+        
     return fulfill
-    
 
 def blockfilter(conditions,blocks):
     """
@@ -244,10 +279,15 @@ gold_lexicon = {
     'under':[('U','under')],
     'over':[('U','over')],
     'and':[('AND','und')],
-    #'of':[('O','ofl'),('O','ofr')],
-    #'left':[('L','left')],
-    #'right':[('R','right')]
+    'next':[('NEXT', 'next')],
+    'to':[('TO', 'to')],
+    'of':[('TO', 'to')],
+    'left':[('LR', 'left')],
+    'right':[('LR', 'right')],
+    'the':[('THE', 'the')]
+
 }
+
 
 # The binarized rule set for our pictures
 # The second rule corresponds to:
@@ -257,17 +297,19 @@ rules = [
     ['E','N','EN',(0,1)],
     ['E','I','E',(1,0)],
     ['EN','B','V',(0,1)],
-    ['U','N','UN',(0,1)],
-    ['UN','B','L',(0,1)],
-    ['B','L','B',(1,0)],
+    ['EN','BS','V',(0,1)],
+    ['U','N','POS',(0,1)],
+    ['PP','N','POS',(0,1)],
+    ['POS','B','L',(0,1)],
+    ['POS','BS','L',(0,1)],
+    ['B','L','BS',(1,0)],
     ['V','AND','VAND',(1,0)],
     ['VAND','V','V',(0,1)],
-    #['LEFT','O','LO',(1,0)],
-    #['RIGHT','O','RO'],(1,0),
-    #['LO','N','LON',(0,1)],
-    #['LON','BC','L',(0,1)],
-    #['RO','N','RON',(0,1)],
-    #['RON','BC','L',(0,1)]
+    ['NEXT','TO','PP',(1,0)],
+    ['TS','SIDE','PP',(0,1)],
+    ['TO','THE','TS',(0,1)],
+    ['LR','TO','SIDE',(1,0)]
+    
     
 ]
 
@@ -285,11 +327,14 @@ functions = {
     'yellow':(lambda x: x+[(lambda b:b.colour=="yellow")]),
     'under':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"u")) in n)]))),
     'over':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"o")) in n)]))),
-    #'left':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(filter(lambda: b.x==1)) in n)]))),
-    #'right':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(filter(lambda: b.x==4)) in n)]))),
-    #'ofl':(lambda f:(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"l")) in n)])))),
-    #'ofr':(lambda f:(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"r")) in n)]))))    
+    'next':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"n")) in n)]))),
+    'left':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"l")) in n)]))),
+    'right':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"r")) in n)]))),
+    'to':(lambda x: x),
+    'the':(lambda x: x)
+    
 }
+
 
 
 
@@ -297,14 +342,24 @@ functions = {
 if __name__ == '__main__':
 
     # Simple demo with the test data:
-    from semdata import test_utterances
+    from semdata_TEST import test_utterances
+
 
     # creates the grammar 
     gram = Grammar(gold_lexicon, rules, functions)
 
+    # use picture from world.png and world.py for testing purpose
+    allblocks2 = []
+    all_blocks_grid = allblocks_test.copy()
+    for row in allblocks_test:
+        for blo in row:
+            if blo:
+                allblocks2.append(blo)
+    allblocks=allblocks2
+
     # parses all test sentences from semdata.py
     # prints the derived logical forms for each test sentence and whether the test sentence is true with respect to the example pictuer world.png
-    for u in test_utterances:
+    for i,u in enumerate(test_utterances):
 
         # creates the global variable for keeping track of which block is / blocks are the described one(s)
         guessed_blocks = set()
@@ -316,27 +371,31 @@ if __name__ == '__main__':
             print("\tLF: {}".format(lf))
             print('\tDenotation: {}'.format(gram.sem(lf)))
 
+            # if utterance doesn't describe sentence not blocks should be guessed at all
+            if gram.sem(lf) == False:
+                guessed_blocks = set()
+
             # visualization of how the computer gives feedback about what it "understood"
-            # for the example test sentence 'there is a red triangle under a blue square' the picture object corresponding to world.png is created
+            # for the example for the sentence 'there is a red triangle under a blue square' the picture object corresponding to world.png is created
             # and a png file is created and saved where the blocks that are in all_blocks_grid are marked, e.g. all blocks that are red and have shape
             # triangle and are positioned below a blue square in the grid are marked as well as the blue squares that are above the red triangle
-            if u == 'there is one blue triangle':
-                from BlockPictureGenerator import * 
-                test_pic = Picture(name="test_guessing")
-                test_pic.blocks = allblocks.copy()
-                test_pic.block_n = len(test_pic.blocks)
-                test_pic.grid = all_blocks_grid
+            
+            from BlockPictureGenerator import * 
+            test_pic = Picture(name = "./marked_pictures/" + u)
+            test_pic.blocks = allblocks.copy()
+            test_pic.block_n = len(test_pic.blocks)
+            test_pic.grid = all_blocks_grid
 
-                test_pic.draw()
-                guess = []
-                for b in guessed_blocks:
-                    print(b.colour,b.y,b.y)
-                    guess.append((b.y, b.x))
-                test_pic.mark(guess)
+            test_pic.draw()
+            guess = []
+            for b in guessed_blocks:
+                guess.append((b.y, b.x))
+            test_pic.mark(guess)
 
 
                 
 
     
+
 
 
