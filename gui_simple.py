@@ -30,6 +30,9 @@ game_screen = [
         sg.Button("Enter", key="-ENTER-", visible=False)
     ],
     [
+        sg.Text("a possibly very loooooooooooong description of the picture.......", key="-REMINDER-")
+    ],
+    [
         sg.Text("Did you refer to this?"),
         sg.Button("YES", key="-YES-"),
         sg.Button("NO", key="-NO-")
@@ -87,6 +90,7 @@ while True:
     # Displaying picture and taking input
     if event == "-NEXT-":
         # hiding and unhiding
+        window["-REMINDER-"].hide_row()
         window["-NEXT-"].hide_row()
         window["-YES-"].hide_row()
         window["-INPUT-"].update(disabled=False)
@@ -111,9 +115,12 @@ while True:
     if event == "-ENTER-":
         # hiding and unhiding
         window["-ENTER-"].hide_row()
+        window["-REMINDER-"].unhide_row()
         window["-YES-"].unhide_row()
 
+
         inpt = inpt.lower()
+        window["-REMINDER-"].update(('"'+inpt+'"'))
         print(inpt)
         eval_input = inpt
 
@@ -143,6 +150,7 @@ while True:
         # hiding and unhiding
         window["-YES-"].hide_row()
         window["-ENTER-"].unhide_row()
+        window["-REMINDER-"].hide_row()
 
         eval_response = "yes"
         with open("evaluation.csv", "a", encoding="utf-8") as f:
@@ -163,7 +171,7 @@ while True:
 
     if event == "-NO-":
         # hiding and unhiding
-        # yet to come
+        window["-REMINDER-"].unhide_row()
 
         eval_response = "no"
         with open("evaluation.csv", "a", encoding="utf-8") as f:
