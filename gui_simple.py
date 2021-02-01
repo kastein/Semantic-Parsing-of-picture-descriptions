@@ -4,8 +4,12 @@ from grammar import *
 import os.path
 from PIL import Image, ImageTk
 from PictureLevel import *
+from Semantic_Learner import evaluate_semparse
+import math
 
-gram = Grammar(gold_lexicon, rules, functions)
+crude_lexicon={}
+crude_rule = [('THE', 'the'),('LR', 'right'),('LR', 'left'),('TO', 'to'),('NEXT', 'next'),('B','[]'),('B','[(lambda b: b.shape == "rectangle")]'),('B','[(lambda b: b.shape == "triangle")]'),('B','[(lambda b: b.shape == "circle")]'),('C','green'),('C','yellow'),('C','blue'),('C','red'),('E','exist'),('I','identy'),('N','range(1,17)'),('N','[1]'),('U','under'),('U','over'),('AND','und')]
+
 
 starting_screen = [
     [
@@ -28,9 +32,6 @@ game_screen = [
         sg.Text("Describe the picture:", key="-INSTRUCTION-"), # store what is being typed, when person hits enter
         sg.In(size=(25, 1), enable_events=True, key="-INPUT-", disabled=True),
         sg.Button("Enter", key="-ENTER-", visible=False)
-    ],
-    [
-        sg.Text("a possibly very loooooooooooong description of the picture.......", key="-REMINDER-")
     ],
     [
         sg.Text("Did you refer to this?"),
@@ -89,13 +90,13 @@ while True:
 
     # Displaying picture and taking input
     if event == "-NEXT-":
+        guessed_blocks.clear()
         # hiding and unhiding
-        window["-REMINDER-"].hide_row()
         window["-NEXT-"].hide_row()
         window["-YES-"].hide_row()
         window["-INPUT-"].update(disabled=False)
         window["-ENTER-"].update(visible=True)
-
+   
         if i_picture >= 10:
             i_picture = 0
             level += 1
@@ -115,26 +116,33 @@ while True:
     if event == "-ENTER-":
         # hiding and unhiding
         window["-ENTER-"].hide_row()
-        window["-REMINDER-"].unhide_row()
         window["-YES-"].unhide_row()
-
-
         inpt = inpt.lower()
-        window["-REMINDER-"].update(('"'+inpt+'"'))
         print(inpt)
         eval_input = inpt
+   
+        for word in inpt.split():
+            if not word in crude_lexicon:
+                crude_lexicon[word]=crude_rule
+        gram = Grammar(crude_lexicon,rules,functions)
 
         # here go into semantic parser
         #guessed_blocks = []
-        lfs = gram.gen(inpt)
-        for lf in lfs:
-            print("\tLF: {}".format(lf))
-            print('\tDenotation: {}'.format(gram.sem(lf)))
+        lfs = iter(gram.gen(inpt))
+        #for lf in lfs:
+            #print("\tLF: {}".format(lf))
+            #print('\tDenotation: {}'.format(gram.sem(lf)))
         #print(guessed_blocks)
         # Katharina added following 2 lines
-        if gram.sem(lf) == False:
+        lf = next(lfs)
+        while gram.sem(lf) == False:
             guessed_blocks.clear()
+            lf=next(lfs)
+            
+        print(lf,gram.sem(lf))
+        print(guessed_blocks)
         guess = []
+        print("GUESSEDBLOCKS",guessed_blocks)
         for b in guessed_blocks:
             guess.append((b.y, b.x))
         print(guessed_blocks)
@@ -150,8 +158,23 @@ while True:
         # hiding and unhiding
         window["-YES-"].hide_row()
         window["-ENTER-"].unhide_row()
-        window["-REMINDER-"].hide_row()
-
+        weights = evaluate_semparse(inpt,lf,gram)
+        """
+        minrule = None
+        minprob = math.inf
+        minword = None
+        for w in weights:
+            if len(w)==2:
+                rule,word = w
+                prob = weights[w]
+                if prob < minprob:
+                    prob = minprob
+                    minrule = rule
+                    minword = word
+        print("DELETE:",word,minrule)
+        crude_lexicon[minword].remove(minrule)
+        gram = Grammar(crude_lexicon,rules,functions)"""
+                       
         eval_response = "yes"
         with open("evaluation.csv", "a", encoding="utf-8") as f:
             line = eval_picture + "," + eval_input + "," + eval_marked_picture + "," + eval_response + "\n"
@@ -171,14 +194,46 @@ while True:
 
     if event == "-NO-":
         # hiding and unhiding
-        window["-REMINDER-"].unhide_row()
-
-        eval_response = "no"
-        with open("evaluation.csv", "a", encoding="utf-8") as f:
-            line = eval_picture + "," + eval_input + "," + eval_marked_picture + "," + eval_response + "\n"
-            f.writelines(line)
+        # yet to come
         # ask for next guess from parser
-        picture = Picture(name="guitest").mark([(1,2)])
-        window["-IMAGE-"].update(filename="guitest_guess.png")
+        try:
+            guessed_blocks.clear()
+            lf = next(lfs)
+            while gram.sem(lf) == False:
+                guessed_blocks.clear()
+                lf=next(lfs)
+            guess = []
+            print("GUESSEDBLOCKS",guessed_blocks)
+            for b in guessed_blocks:
+                guess.append((b.y, b.x))
+            print(guess)
+            print(guessed_blocks)
+            guessed_blocks.clear()
+            current_pic.mark(guess)
+            window["-IMAGE-"].update(filename=picture_path(level, i_picture, guess=True))
+            window["-INPUT-"].update("")
+            eval_marked_picture = str(picture_path(level, i_picture, guess=True))
+
+        
+            eval_response = "no"
+            with open("evaluation.csv", "a", encoding="utf-8") as f:
+                line = eval_picture + "," + eval_input + "," + eval_marked_picture + "," + eval_response + "\n"
+                f.writelines(line)
+        except StopIteration:
+            window["-YES-"].hide_row()
+            window["-ENTER-"].unhide_row()
+            if i_picture >= 10:
+                i_picture = 0
+                level += 1
+            i_picture += 1
+            current_pic = setPicParameters(level, i_picture, session_name)
+            current_pic.draw()
+            # Katharina added following line
+            create_all_blocks(current_pic)
+            window["-IMAGE-"].update(filename=picture_path(level, i_picture))
+            eval_picture = str(picture_path(level, i_picture))
+            window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
+        
+       
 
 window.close()

@@ -60,23 +60,24 @@ from itertools import product
 from world import *
 
 
+# allblocks are the the blocks from world.py and world.jpg that get used as an example here
+# all_blocks_grid is needed later to create the Picture Object corresponding to the picutre in world.jpg
 
 allblocks = []
 guessed_blocks = set()
 all_blocks_grid = []
 
-
-
+# a list of all blocks that is used for evaluating the truth of the descriptions (doesn't include None anymore)
 def create_all_blocks(picture):
-    allblocks.clear()
     grid = picture.grid
-    #all_blocks_grid = grid.copy()
+    print(grid)
+    all_blocks_grid = grid.copy()
     for row in grid:
         for b in row:
             if b:
-                allblocks.append(b)            
+                allblocks.append(b)
     return None
-    
+
 
 def positiontest(blocks,blocklocations,position):
     """
@@ -88,7 +89,6 @@ def positiontest(blocks,blocklocations,position):
     """
     fulfill = []
     checked = set()
-    passed_check = set()
 
     for b1 in blocks:
         for b2 in blocklocations:
@@ -97,40 +97,51 @@ def positiontest(blocks,blocklocations,position):
             if position == "u":
                 if b1.y > b2.y:
                     fulfill.append(b1)
-                    passed_check.add(b1)
-                    passed_check.add(b2)
+                    try:
+                        checked.remove(b1)
+                        checked.remove(b2)
+                    except:
+                        continue
 
             elif position == "o":
                 if b1.y < b2.y:
-                    fulfill.append(b1)
-                    passed_check.add(b1)
-                    passed_check.add(b2)
- 
-            elif position == "n":
-                if b1.y == b2.y and b1.x == b2.x+1 or b1.x == b2.x-1:
-                    fulfill.append(b1)
-                    passed_check.add(b1)
-                    passed_check.add(b2)
+                    fulfill.append(b2)
+                    try:
+                        checked.remove(b1)
+                        checked.remove(b2)
+                    except:
+                        continue
 
+            elif position == "n":
+                if b1.y == b2.x+1 or b1.y == b2.x-1:
+                    fulfill.append(b1)
+                    try:
+                        checked.remove(b1)
+                        checked.remove(b2)
+                    except:
+                        continue
             elif position == "l":
                 if b1.x < b2.x:
                     fulfill.append(b1)
-                    passed_check.add(b1)
-                    passed_check.add(b2)
- 
+                    try:
+                        checked.remove(b1)
+                        checked.remove(b2)
+                    except:
+                        continue
+                    
             elif position == "r":
                 if b1.x > b2.x:
-                    fulfill.append(b1)
-                    passed_check.add(b1)
-                    passed_check.add(b2)
-
+                    fulfill.append(b2)
+                    try:
+                        checked.remove(b1)
+                        checked.remove(b2)
+                    except:
+                        continue
 
     for bl in checked:
-        if bl not in passed_check:
-            guessed_blocks.remove(bl)
+        guessed_blocks.remove(bl)
         
     return fulfill
-    
 
 def blockfilter(conditions,blocks):
     """
@@ -144,8 +155,8 @@ def blockfilter(conditions,blocks):
             test = test and c(b)
         if test:
             fulfill.append(b)
-            #guessed_blocks.add(b)
-    guessed_blocks.update(fulfill)
+            guessed_blocks.add(b)
+        
     return fulfill
 
 
@@ -155,25 +166,74 @@ class Grammar:
         self.lexicon = lexicon
         self.rules = rules
         self.functions = functions
+        self.backpointers = defaultdict(list)
+
+    def recursive_treebuild(self,current):
+        #print("current",current)
+        current_label = current[0]
+        current_start = current[1]
+        current_end = current[2]
+        sub_trees = []
+        if current_end - current_start == 1:
+            leaf = self.backpointers[current]
+            tree = [current_label,leaf]
+            sub_trees.append(tree)
+        else:
+            possible_children = self.backpointers[current]
+            for pointer in possible_children:
+                #print(pointer,len(pointer))
+                child1 = pointer[0]
+                child2 = pointer[1]
+                k = pointer[2] # split in Katharinas Code
+                left_subtrees = self.recursive_treebuild((child1,current_start,k))
+                right_subtrees = self.recursive_treebuild((child2,k,current_end))
+                
+                for left in left_subtrees:
+                    for right in right_subtrees:
+                        tree = [current_label,[left,right]]
+                        sub_trees.append(tree)
+
+        return sub_trees
+                
+
+    def compute_parse_trees(self,n):
+        #start_point = ('V',0,n)
+        parse_trees = []
+        #for i in backpointers:
+            #print("key",i,backpointers[i])
+        for l,x,y in self.backpointers:
+            if l[0]=="V" and x == 0 and y==n:
+                parse_trees += self.recursive_treebuild((l,x,y))
+        return parse_trees
+        
+        
+        
+        
 
     def gen(self, s):
         """CYK parsing, but we just keep the full derivations. The input
         s should be a string that can be parsed with this grammar."""
         words = s.split()
         n = len(words)+1
-        trace = defaultdict(list)
+        trace = defaultdict(set)
+        self.backpointers = defaultdict(list)
+        
         for i in range(1,n):
             word = words[i-1]
-            trace[(i-1,i)] = [[(syntax, semantics), word]
-                              for syntax, semantics in self.lexicon[word]]
+            for syntax,semantic in self.lexicon[word]:
+                trace[(i-1,i)].add((syntax,semantic))
+                self.backpointers[((syntax,semantic),i-1,i)].append(word)
         for j in range(2, n):
             for i in range(j-1, -1, -1):
                 for k in range(i+1, j):
                     for c1, c2 in product(trace[(i,k)], trace[(k,j)]):
-                        for lfnode in self.allcombos(c1[0], c2[0]):                                                                                                          
-                            trace[(i,j)].append([lfnode, c1, c2])
+                        for lfnode in self.allcombos(c1,c2):
+                            trace[(i,j)].add(lfnode)
+                            #print(c1,c2)
+                            self.backpointers[(lfnode,i,j)].append((c1,c2,k))
         # Return only full parses, from the upper right of the chart:
-        return trace[(0,n-1)] 
+        #return buildtrees(trace[(0,n-1)])
+        return self.compute_parse_trees(n-1)
 
     def allcombos(self, c1, c2):
         """Given any two nonterminal node labels, find all the ways
@@ -197,8 +257,6 @@ class Grammar:
         return eval(lf[0][1]) # Interpret just the root node's semantics. 
 
 # The lexicon for our pictures 
-
-
 gold_lexicon = {
     'form':[('B','[]')],
     'forms':[('B','[]')],
@@ -207,7 +265,7 @@ gold_lexicon = {
     'triangle': [('B','[(lambda b: b.shape == "triangle")]')],
     'triangles': [('B','[(lambda b: b.shape == "triangle")]')],
     'circle': [('B','[(lambda b: b.shape == "circle")]')],
-    'circles': [('B','[(lambda b: b.shape == "circle")]')],
+    'circles': [('B','[(lambda b: b.shape == "circles")]')],
     'green':[('C','green')],
     'yellow':[('C','yellow')],
     'blue':[('C','blue')],
@@ -230,6 +288,7 @@ gold_lexicon = {
     'the':[('THE', 'the')]
 
 }
+
 
 # The binarized rule set for our pictures
 # The second rule corresponds to:
@@ -257,6 +316,7 @@ rules = [
 
 # These are needed to interpret our logical forms with eval. They are
 # imported into the namespace Grammar.sem to achieve that.
+# so far only above and under are working, we are going to add left and right also
 functions = {
     'block': (lambda conditions: (lambda number_requirement: (number_requirement,conditions))),
     'identy': (lambda x: x),
@@ -266,23 +326,24 @@ functions = {
     'red': (lambda x: x+[(lambda b:b.colour=="red")]),
     'green': (lambda x: x+[(lambda b:b.colour=="green")]),
     'yellow':(lambda x: x+[(lambda b:b.colour=="yellow")]),
-    'under':(lambda n: (lambda x:(lambda y: [(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"u")) in n and b in positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"u"))]))),
-    'over':(lambda n: (lambda x:(lambda y: [(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"o")) in n and b in positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"o"))]))),
-    'next':(lambda n: (lambda x:(lambda y: [(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"n")) in n and b in positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"n"))]))),
-    'left':(lambda n: (lambda x:(lambda y: [(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"l")) in n and b in positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"l"))]))),
-    'right':(lambda n: (lambda x:(lambda y: [(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"r")) in n and b in positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"r"))]))),
+    'under':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"u")) in n)]))),
+    'over':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"o")) in n)]))),
+    'next':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"n")) in n)]))),
+    'left':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"l")) in n)]))),
+    'right':(lambda n: (lambda x:(lambda y: y+[(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"r")) in n)]))),
     'to':(lambda x: x),
     'the':(lambda x: x)
     
 }
 
 
-# Main is used for testing the gramamr with the test sentences from semdata.py 
+
+
 
 if __name__ == '__main__':
 
     # Simple demo with the test data:
-    from semdata import test_utterances
+    from semdata_TEST import test_utterances
 
 
     # creates the grammar 
@@ -336,5 +397,6 @@ if __name__ == '__main__':
                 
 
     
+
 
 

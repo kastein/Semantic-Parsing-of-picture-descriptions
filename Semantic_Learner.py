@@ -56,8 +56,7 @@ import re
 from collections import defaultdict
 from grammar import Grammar, rules, functions
 from learning import evaluate, SGD, LatentSGD
-import semdata
-import nltk
+import semdata as semdata
 
 
 def phi_sem(x, y):
@@ -79,45 +78,16 @@ def leaves(x):
     """Recursive function for finding all the preterminals (mother--child)
     trees. Used by phi_sem"""
     # Leaf-only trees:
-    if len(x) == 2 and isinstance(x[1], str):
-        return [tuple(x)]
+    if len(x[1])==1 and isinstance(x[1][0],str):
+        return [(x[0],x[1][0])]
     # Recursive call for all child subtrees:
     l = []
-    for child in x[1: ]:
+    for child in x[1]:
         l += leaves(child)
     return l
 
-# This crude lexicon is the starting point for learning; it respects
-# typing but nothing else:
-pos_rules = dict()
-pos_rules['NN'] = [('LR', 'right'),('LR', 'left'),('B','[]'),('B','[(lambda b: b.shape == "rectangle")]'),('B','[(lambda b: b.shape == "triangle")]'),('B','[(lambda b: b.shape == "circle")]'),('LR', 'left'),('LR', 'right')]
-pos_rules['NNS'] = [('LR', 'right'),('LR', 'left'),('B','[]'),('B','[(lambda b: b.shape == "rectangle")]'),('B','[(lambda b: b.shape == "triangle")]'),('B','[(lambda b: b.shape == "circle")]'),('LR', 'left'),('LR', 'right')]
-pos_rules['EX']=[('E','exist')]
-pos_rules['VBP']=[('I','identy')]
-pos_rules['VBZ']=[('I','identy')]
-pos_rules['TO']= [('TO', 'to')]
-pos_rules['IN'] = [('TO', 'to'),('U','over'),('U','under')]
-pos_rules['DT'] = [('THE', 'the'),('N','range(1,17)')]
-pos_rules['CC'] = [('AND','und')]
-pos_rules['CD'] = [('N','[1]'),('N','[2]'),('N','[3]')]
-pos_rules['JJ'] = [('C','green'),('C','yellow'),('C','blue'),('C','red'),('NEXT', 'next')]
 
-crude_lexicon = {}
-for utterance in semdata.train_utterances+semdata.test_utterances:
-    for word,pos in nltk.pos_tag(nltk.word_tokenize(utterance)):
-        crude_lexicon[word]=pos_rules[pos]
-    
-
-# no matter which language, but then we will get a memory error
-#for word in ('form','square','squares','triangle','triangles','circle','circles','green','yellow','blue','red','there','is','are','a','one','two','under','over','and','one','a','two','three'):
-    #crude_lexicon[word] = [('B','[]'),('B','[(lambda b: b.shape == "rectangle")]'),('B','[(lambda b: b.shape == "triangle")]'),('B','[(lambda b: b.shape == "circle")]'),('C','green'),('C','yellow'),('C','blue'),('C','red'),('E','exist'),('I','identy'),('N','range(1,int(sys.float_info.max))'),('N','[1]'),('N','[1]'),('U','under'),('U','over'),('AND','und')]
-
-
-# Our crude grammar, the starting point for learning. rules and
-# functions are as defined in grammar.py
-gram = Grammar(crude_lexicon, rules, functions)
-
-def evaluate_semparse():
+def evaluate_semparse(u,lf,grammar):
     """Evaluate the semantic parsing set-up, where we learn from and 
     predict logical forms. The set-up is identical to the simple 
     example in evenodd.py, except that classes is gram.gen, which 
@@ -125,70 +95,26 @@ def evaluate_semparse():
     print("======================================================================")
     print("SEMANTIC PARSING")
     # Only (input, lf) pairs for this task:
-    semparse_train = [[x,y] for x, y, d in semdata.sem_train]
-    semparse_test = [[x,y] for x, y, d in semdata.sem_test]        
-    evaluate(phi=phi_sem,
-             optimizer=SGD,
-             train=semparse_train,
-             test=semparse_test,
-             classes=gram.gen,
-             T=10,
-             eta=0.1)
+    lf = list(grammar.gen(u))[-1]
+    sem_utterance=[[u, lf, grammar.sem(lf)]]
+    semparse_train = [[x,y] for x, y, d in sem_utterance]
+    semparse_test = [[x,y] for x, y, d in sem_utterance]        
+    weights = evaluate(phi=phi_sem,
+                       optimizer=SGD,
+                       train=semparse_train,
+                       test=semparse_test,
+                       classes=grammar.gen,
+                       true_or_false=grammar.sem,
+                       T=10,
+                       eta=0.1)
+    return weights
     
-def evaluate_interpretive():
-    """Evaluate the interpretive set-up, where we learn from and 
-    predict denotations. The only changes from evaluate_semparse are 
-    that we use LatentSGD, and output_transform handles the mapping 
-    from the logical forms we create to denotations."""
-    print("======================================================================")
-    print('INTERPRETIVE')
-    # Only (input, denotation) pairs for this task:
-    interpretive_train = [[x,d] for x, y, d in semdata.sem_train]
-    interpretive_test =  [[x,d] for x, y, d in semdata.sem_test]
-    evaluate(phi=phi_sem,
-             optimizer=LatentSGD,
-             train=interpretive_train,
-             test=interpretive_test,
-             classes=gram.gen,
-             T=10,
-             eta=0.1,
-             output_transform=gram.sem)
 
-def evaluate_latent_semparse():
-    print("======================================================================")
-    print('LATENT SEMANTIC PARSING')
-    # Only (input, LF root node) pairs for this task; y[0][1] indexes
-    # into the semantics of the root node:
-    latent_semparse_train = [[x,y[0][1]] for x, y, d in semdata.sem_train]
-    latent_semparse_test =  [[x,y[0][1]] for x, y, d in semdata.sem_test]  
-    # To make this interesting, we add a rule of type-raising for
-    # digits, so that derivations with the predicate neg in them have
-    # multiple derivational paths leading to the same output: First,
-    # every digit can now be introduced in its lifted form:
-    for word in ('one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'):
-        crude_lexicon[word] += [('Q', 'lift(%s)' % i) for i in range(1,10)]
-    # The new rule reversing the order of application between U and
-    # its N (qua Q):
-    rules.append(['U', 'Q', 'N', (1,0)])
-    # Semantics for lift:
-    functions['lift'] = (lambda x : (lambda f : f(x)))
-    # New grammar:
-    gram = Grammar(crude_lexicon, rules, functions)    
-    # Now train with LatentSGD, where the output transformation is 
-    # one that grabs the root node:
-    evaluate(phi=phi_sem,
-             optimizer=LatentSGD,
-             train=latent_semparse_train,
-             test=latent_semparse_test,
-             classes=gram.gen,
-             T=10,
-             eta=0.1,
-             output_transform=(lambda y : y[0][1]))
 
 
 if __name__ == '__main__':
 
     evaluate_semparse()
-    evaluate_interpretive()
-    #evaluate_latent_semparse()
+
+   
 

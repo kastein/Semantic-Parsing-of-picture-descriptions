@@ -67,7 +67,7 @@ def predict(x=None, w=None, phi=None, classes=None, output_transform=(lambda x :
 # code).
 ######################################################################
 
-def SGD(D=None, phi=None, classes=None, T=10, eta=0.1, output_transform=None):
+def SGD(D=None, phi=None, classes=None, true_or_false=None, T=10, eta=0.1, output_transform=None):
     """Implements stochatic (sub)gradient descent, as in the paper.
     `classes` should be a function of the input `x` for structure
     prediction cases (where `classes` is `GEN`)."""
@@ -75,6 +75,7 @@ def SGD(D=None, phi=None, classes=None, T=10, eta=0.1, output_transform=None):
     for t in range(T):
         random.shuffle(D)
         for x, y in D:
+            print("---",true_or_false(y))
             # Get all (score, y') pairs:
             scores = [(score(x, y_alt, phi, w)+cost(y, y_alt), y_alt)
                       for y_alt in classes(x)]
@@ -128,7 +129,8 @@ def evaluate(
         optimizer=None, 
         train=None, 
         test=None, 
-        classes=None, 
+        classes=None,
+        true_or_false=None,
         T=10, 
         eta=0.1, 
         output_transform=(lambda x : x)):
@@ -145,19 +147,14 @@ def evaluate(
         T=T,
         eta=eta,
         classes=classes,
+        true_or_false=true_or_false,
         output_transform=output_transform)
     print("--------------------------------------------------")
     print('Learned feature weights')
+
     for f, val in sorted(list(w.items()), key=itemgetter(1), reverse=True):
         print("{} {}".format(f, val))
-    for label, data in (('Train', train), ('Test', test)):
-        print("--------------------------------------------------")
-        print('{} predictions'.format(label))
-        for x, y in data:
-            prediction = predict(
-                x, w, phi=phi, classes=classes, output_transform=output_transform)
-            print('\nInput:    {}'.format(x))
-            print('Gold:       {}'.format(y))
-            print('Prediction: {}'.format(prediction))
-            print('Correct:    {}'.format(y == prediction))
+    return w
+    
+    
 
