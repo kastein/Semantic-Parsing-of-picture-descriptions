@@ -8,7 +8,7 @@ from Semantic_Learner import evaluate_semparse
 import math
 
 crude_lexicon={}
-crude_rule = [('THE', 'the'),('LR', 'right'),('LR', 'left'),('TO', 'to'),('NEXT', 'next'),('B','[]'),('B','[(lambda b: b.shape == "rectangle")]'),('B','[(lambda b: b.shape == "triangle")]'),('B','[(lambda b: b.shape == "circle")]'),('C','green'),('C','yellow'),('C','blue'),('C','red'),('E','exist'),('I','identy'),('N','range(1,17)'),('N','[1]'),('U','under'),('U','over'),('AND','und')]
+crude_rule = [('THE', 'the'),('LR', 'right'),('LR', 'left'),('TO', 'to'),('NEXT', 'next'),('B','[]'),('B','[(lambda b: b.shape == "rectangle")]'),('B','[(lambda b: b.shape == "triangle")]'),('B','[(lambda b: b.shape == "circle")]'),('C','green'),('C','yellow'),('C','blue'),('C','red'),('E','exist'),('I','identy'),('N','[2]'),('N','[3]'),('N','range(1,17)'),('N','[1]'),('U','under'),('U','over'),('AND','und')]
 
 
 starting_screen = [
@@ -123,7 +123,7 @@ while True:
    
         for word in inpt.split():
             if not word in crude_lexicon:
-                crude_lexicon[word]=crude_rule
+                crude_lexicon[word]=crude_rule[:]
         gram = Grammar(crude_lexicon,rules,functions)
 
         # here go into semantic parser
@@ -159,7 +159,6 @@ while True:
         window["-YES-"].hide_row()
         window["-ENTER-"].unhide_row()
         weights = evaluate_semparse(inpt,lf,gram)
-        """
         minrule = None
         minprob = math.inf
         minword = None
@@ -168,12 +167,17 @@ while True:
                 rule,word = w
                 prob = weights[w]
                 if prob < minprob:
-                    prob = minprob
+                    minprob = prob
                     minrule = rule
                     minword = word
-        print("DELETE:",word,minrule)
+        #print(minprob,minword,minrule)
+        #print("DELETE:",minword,minrule)
         crude_lexicon[minword].remove(minrule)
-        gram = Grammar(crude_lexicon,rules,functions)"""
+        """for word in crude_lexicon:
+            print(word)
+            for rule in crude_lexicon[word]:
+                print(rule)"""
+        gram = Grammar(crude_lexicon,rules,functions)
                        
         eval_response = "yes"
         with open("evaluation.csv", "a", encoding="utf-8") as f:
@@ -206,8 +210,6 @@ while True:
             print("GUESSEDBLOCKS",guessed_blocks)
             for b in guessed_blocks:
                 guess.append((b.y, b.x))
-            print(guess)
-            print(guessed_blocks)
             guessed_blocks.clear()
             current_pic.mark(guess)
             window["-IMAGE-"].update(filename=picture_path(level, i_picture, guess=True))
