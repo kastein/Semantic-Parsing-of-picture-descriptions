@@ -95,7 +95,6 @@ def evaluate_semparse(u,lf,grammar):
     print("======================================================================")
     print("SEMANTIC PARSING")
     # Only (input, lf) pairs for this task:
-    lf = list(grammar.gen(u))[-1]
     sem_utterance=[[u, lf, grammar.sem(lf)]]
     semparse_train = [[x,y] for x, y, d in sem_utterance]
     semparse_test = [[x,y] for x, y, d in sem_utterance]        
