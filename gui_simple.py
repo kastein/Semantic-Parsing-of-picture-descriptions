@@ -6,10 +6,12 @@ from PIL import Image, ImageTk
 from PictureLevel import *
 from Semantic_Learner import evaluate_semparse
 import math
+from collections import defaultdict
 
 crude_lexicon={}
 crude_rule = [('THE', 'the'),('LR', 'right'),('LR', 'left'),('TO', 'to'),('NEXT', 'next'),('B','[]'),('B','[(lambda b: b.shape == "rectangle")]'),('B','[(lambda b: b.shape == "triangle")]'),('B','[(lambda b: b.shape == "circle")]'),('C','green'),('C','yellow'),('C','blue'),('C','red'),('E','exist'),('I','identy'),('N','[2]'),('N','[3]'),('N','range(1,17)'),('N','[1]'),('U','under'),('U','over'),('AND','und')]
-
+threshold = -0.5
+total_scores = defaultdict(lambda:defaultdict(int))
 
 starting_screen = [
     [
@@ -124,6 +126,8 @@ while True:
         for word in inpt.split():
             if not word in crude_lexicon:
                 crude_lexicon[word]=crude_rule[:]
+                for rule in crude_rule:
+                    total_scores[word][rule]=0
         gram = Grammar(crude_lexicon,rules,functions)
 
         # here go into semantic parser
@@ -134,51 +138,52 @@ while True:
             #print('\tDenotation: {}'.format(gram.sem(lf)))
         #print(guessed_blocks)
         # Katharina added following 2 lines
-        lf = next(lfs)
-        while gram.sem(lf) == False:
-            guessed_blocks.clear()
-            lf=next(lfs)
-            
-        print(lf,gram.sem(lf))
-        print(guessed_blocks)
-        guess = []
-        print("GUESSEDBLOCKS",guessed_blocks)
-        for b in guessed_blocks:
-            guess.append((b.y, b.x))
-        print(guessed_blocks)
         guessed_blocks.clear()
+        try:
+            lf = next(lfs)
+            while gram.sem(lf) == False:
+                guessed_blocks.clear()
+                lf=next(lfs)
+            guess = []
+            for b in guessed_blocks:
+                guess.append((b.y, b.x))
+            guessed_blocks.clear()
 
-        # mark the guessed blocks in the picture
-        current_pic.mark(guess)
-        window["-IMAGE-"].update(filename=picture_path(level, i_picture, guess=True))
-        window["-INPUT-"].update("")
-        eval_marked_picture = str(picture_path(level, i_picture, guess=True))
+            # mark the guessed blocks in the picture
+            current_pic.mark(guess)
+            window["-IMAGE-"].update(filename=picture_path(level, i_picture, guess=True))
+            window["-INPUT-"].update("")
+            eval_marked_picture = str(picture_path(level, i_picture, guess=True))
+        except StopIteration:
+            pass
 
     if event == "-YES-":
+        guessed_blocks.clear()
         # hiding and unhiding
         window["-YES-"].hide_row()
         window["-ENTER-"].unhide_row()
         weights = evaluate_semparse(inpt,lf,gram)
-        minrule = None
-        minprob = math.inf
-        minword = None
-        for w in weights:
-            if len(w)==2:
-                rule,word = w
-                prob = weights[w]
-                if prob < minprob:
-                    minprob = prob
-                    minrule = rule
-                    minword = word
-        #print(minprob,minword,minrule)
-        #print("DELETE:",minword,minrule)
-        crude_lexicon[minword].remove(minrule)
-        """for word in crude_lexicon:
-            print(word)
-            for rule in crude_lexicon[word]:
-                print(rule)"""
+        print("TEST",[weights[key] for key in weights],[0.0 for word in inpt],len(inpt.split()))
+        if [weights[key] for key in weights] == [0.0 for word in inpt.split()]:
+            print("Works!")
+            for w in weights:
+                if len(w)==2:
+                    rule,word = w
+                    crude_lexicon[word]=[rule]
+        else:
+            for w in weights:
+                if len(w)==2:
+                    rule,word = w
+                    score = weights[w]
+                    total_scores[word][rule]+=score
+                    if total_scores[word][rule]<=threshold :
+                        del total_scores[word][rule]
+                        print("DELETE:",word,rule)
+                        crude_lexicon[word].remove(rule)       
+       
         gram = Grammar(crude_lexicon,rules,functions)
-                       
+        for word in crude_lexicon:
+            print(word,len(crude_lexicon[word]))
         eval_response = "yes"
         with open("evaluation.csv", "a", encoding="utf-8") as f:
             line = eval_picture + "," + eval_input + "," + eval_marked_picture + "," + eval_response + "\n"
@@ -200,8 +205,8 @@ while True:
         # hiding and unhiding
         # yet to come
         # ask for next guess from parser
+        guessed_blocks.clear()
         try:
-            guessed_blocks.clear()
             lf = next(lfs)
             while gram.sem(lf) == False:
                 guessed_blocks.clear()
