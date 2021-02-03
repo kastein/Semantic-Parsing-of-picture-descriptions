@@ -9,11 +9,11 @@ Focused research question:  Can we teach a computer a mapping from natural langu
 
 To play the current status of our language learning game you only have to clone the repository and run the gui_simple.py script.
 
-**Requirements**
-Python 3 
-package tkinter
-package PIL 
-package PySimpleGUI
+**Requirements**<br>
+Python 3 <br>
+package tkinter <br>
+package PIL <br>
+package PySimpleGUI <br>
 
 
 ## Files 
