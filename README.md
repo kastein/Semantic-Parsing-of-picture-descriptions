@@ -11,9 +11,9 @@ To play the current status of our language learning game you only have to clone 
 
 **Requirements**<br>
 Python 3 <br>
-package tkinter <br>
-package PIL <br>
-package PySimpleGUI <br>
+tkinter <br>
+PIL <br>
+PySimpleGUI <br>
 
 
 ## Files 
