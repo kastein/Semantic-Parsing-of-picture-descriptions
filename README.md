@@ -27,4 +27,4 @@ PySimpleGUI <br>
 * grammar.py:
 * gui_simple: working GUI
 * learning.py
-* semdata.py:
+* semdata.py: training and test sentences
