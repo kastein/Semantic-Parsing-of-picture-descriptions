@@ -22,7 +22,7 @@ starting_screen = [
 
 game_screen = [
     [
-        sg.Text("Level 0, Picture 0:", key="-LEVEL-")
+        sg.Text("Level xx, Picture xx:", key="-LEVEL-")
     ],
     [
         sg.Button("Press here to show first picture", key="-NEXT-")
