@@ -32,8 +32,8 @@ game_screen = [
     ],
     [
         sg.Text("Describe the picture:", key="-INSTRUCTION-"), # store what is being typed, when person hits enter
-        sg.In(size=(25, 1), enable_events=True, key="-INPUT-", disabled=True),
-        sg.Button("Enter", key="-ENTER-", visible=False)
+        sg.In(size=(25, 1), enable_events=True, key="-INPUT-"),
+        sg.Button("Enter", key="-ENTER-")
     ],
     [
         sg.Text("Did you refer to this?"),
@@ -73,7 +73,7 @@ def picture_path(level, i_picture, session_name="pictures", guess=False):
     return path_pict
 
 with open("evaluation.csv", "w", encoding="utf-8") as f:
-    first_line = "picture,input,marked_picture,response\n"
+    first_line = "picture,input,marked_picture,attempts\n"
     f.writelines(first_line)
 
 inpt = ""
@@ -96,8 +96,8 @@ while True:
         # hiding and unhiding
         window["-NEXT-"].hide_row()
         window["-YES-"].hide_row()
-        window["-INPUT-"].update(disabled=False)
-        window["-ENTER-"].update(visible=True)
+        #window["-INPUT-"].update(disabled=False)
+        #window["-ENTER-"].update(visible=True)
    
         if i_picture >= 10:
             i_picture = 0
@@ -117,7 +117,9 @@ while True:
 
     if event == "-ENTER-":
         # hiding and unhiding
-        window["-ENTER-"].hide_row()
+        window["-INPUT-"].update(disabled=True)
+        window["-ENTER-"].update(visible=False)
+        #window["-ENTER-"].hide_row()
         window["-YES-"].unhide_row()
         inpt = inpt.lower()
         print(inpt)
@@ -152,7 +154,6 @@ while True:
             # mark the guessed blocks in the picture
             current_pic.mark(guess)
             window["-IMAGE-"].update(filename=picture_path(level, i_picture, guess=True))
-            window["-INPUT-"].update("")
             eval_marked_picture = str(picture_path(level, i_picture, guess=True))
         except StopIteration:
             pass
@@ -161,7 +162,12 @@ while True:
         guessed_blocks.clear()
         # hiding and unhiding
         window["-YES-"].hide_row()
-        window["-ENTER-"].unhide_row()
+        #window["-ENTER-"].unhide_row()
+        window["-INPUT-"].update(disabled=False)
+        window["-ENTER-"].update(visible=True)
+
+        window["-INPUT-"].update("")
+
         weights = evaluate_semparse(inpt,lf,gram)
         print("TEST",[weights[key] for key in weights],[0.0 for word in inpt],len(inpt.split()))
         if [weights[key] for key in weights] == [0.0 for word in inpt.split()]:
@@ -203,7 +209,6 @@ while True:
 
     if event == "-NO-":
         # hiding and unhiding
-        # yet to come
         # ask for next guess from parser
         guessed_blocks.clear()
         try:
@@ -218,7 +223,7 @@ while True:
             guessed_blocks.clear()
             current_pic.mark(guess)
             window["-IMAGE-"].update(filename=picture_path(level, i_picture, guess=True))
-            window["-INPUT-"].update("")
+            #window["-INPUT-"].update("")
             eval_marked_picture = str(picture_path(level, i_picture, guess=True))
 
         
