@@ -26,5 +26,5 @@ PySimpleGUI <br>
 * PictureLevel.py: generates a picture for a specified level by calling BlockPictureGenerator.py with corresponding parameters
 * grammar.py:
 * gui_simple: working GUI
-* learning.py
+* learning.py: the Stochastic Gradient Descent learn algorithm
 * semdata.py: training and test sentences
