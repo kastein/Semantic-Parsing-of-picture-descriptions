@@ -15,32 +15,34 @@ total_scores = defaultdict(lambda:defaultdict(int))
 
 starting_screen = [
     [
-        sg.Text("Hello! -Description- Press 'Start Game' to start the game"),
-        sg.Button("Start Game", key="-START-")
+        sg.Text("Hello! -Description- Press 'Start Game' to start the game", text_color='white', background_color='black'),
+        sg.Button("Start Game", key="-START-", button_color=('black', 'grey'))
     ]
 ]
 
 game_screen = [
     [
-        sg.Text("Level xx, Picture xx:", key="-LEVEL-")
+        sg.Text("Level xx, Picture xx:", key="-LEVEL-", text_color="white", background_color="black")
     ],
     [
-        sg.Button("Press here to show first picture", key="-NEXT-")
+        sg.Button("Press here to show first picture", key="-NEXT-", button_color=("black", "grey"))
     ],
     [
-        sg.Image(key="-IMAGE-")  # try to read in jpg.files
+        sg.Image(key="-IMAGE-")
     ],
     [
-        sg.Text("Describe the picture:", key="-INSTRUCTION-"), # store what is being typed, when person hits enter
+        sg.Text("Describe the picture:", key="-INSTRUCTION-", text_color="white", background_color="black"), # store what is being typed, when person hits enter
         sg.In(size=(25, 1), enable_events=True, key="-INPUT-"),
-        sg.Button("Enter", key="-ENTER-")
+        sg.Button("Enter", key="-ENTER-", button_color=("black", "grey"))
     ],
     [
-        sg.Text("Did you refer to this?"),
-        sg.Button("YES", key="-YES-"),
-        sg.Button("NO", key="-NO-")
+        sg.Text("Did you refer to this?", text_color="white", background_color="black"),
+        sg.Button("YES", key="-YES-", button_color=("black", "grey")),
+        sg.Button("NO", key="-NO-", button_color=("black", "grey"))
     ]
 ]
+
+sg.theme('Black')
 
 
 layout_starting_screen = [
@@ -78,6 +80,7 @@ with open("evaluation.csv", "w", encoding="utf-8") as f:
 
 inpt = ""
 
+
 while True:
     event, values = window.read()
     print(event, values)
@@ -89,11 +92,15 @@ while True:
     if event == "-START-":
         window.close()
         window = actualgame
+        #window.read()
+        #window["-ENTER-"].hide_row()
+        #window["-YES-"].hide_row()
 
     # Displaying picture and taking input
     if event == "-NEXT-":
         guessed_blocks.clear()
         # hiding and unhiding
+        #window["-ENTER-"].update(button_color=("black", "grey"))
         window["-NEXT-"].hide_row()
         window["-YES-"].hide_row()
         #window["-INPUT-"].update(disabled=False)
