@@ -75,7 +75,7 @@ def picture_path(level, i_picture, session_name="pictures", guess=False):
     return path_pict
 
 with open("evaluation.csv", "w", encoding="utf-8") as f:
-    first_line = "picture,input,marked_picture,attempts\n"
+    first_line = "level\tpicture\tinput\tmarked_picture\tattempts\ttree\n"
     f.writelines(first_line)
 
 inpt = ""
@@ -158,6 +158,7 @@ while True:
             for b in guessed_blocks:
                 guess.append((b.y, b.x))
             guessed_blocks.clear()
+            #print(lf)
 
             # mark the guessed blocks in the picture
             current_pic.mark(guess)
@@ -199,10 +200,11 @@ while True:
         for word in crude_lexicon:
             print(word,len(crude_lexicon[word]))
 
+        print(lf)
         #eval_response = "yes"
         eval_attempts += 1
         with open("evaluation.csv", "a", encoding="utf-8") as f:
-            line = eval_picture + "," + eval_input + "," + eval_marked_picture + "," + str(eval_attempts) + "\n"
+            line = str(level) + "\t" + eval_picture + "\t" + eval_input + "\t" + eval_marked_picture + "\t" + str(eval_attempts) + "\t" + str(lf) + "\n"
             f.writelines(line)
 
         if i_picture >= 10:
