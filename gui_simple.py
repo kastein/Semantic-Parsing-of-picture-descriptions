@@ -118,6 +118,7 @@ while True:
         eval_picture = str(picture_path(level, i_picture))
         window["-INSTRUCTION-"].update("Describe the picture:")
         window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
+        eval_attempts = 0
 
     if event == "-INPUT-":
         inpt = values["-INPUT-"]
@@ -197,9 +198,11 @@ while True:
         gram = Grammar(crude_lexicon,rules,functions)
         for word in crude_lexicon:
             print(word,len(crude_lexicon[word]))
-        eval_response = "yes"
+
+        #eval_response = "yes"
+        eval_attempts += 1
         with open("evaluation.csv", "a", encoding="utf-8") as f:
-            line = eval_picture + "," + eval_input + "," + eval_marked_picture + "," + eval_response + "\n"
+            line = eval_picture + "," + eval_input + "," + eval_marked_picture + "," + str(eval_attempts) + "\n"
             f.writelines(line)
 
         if i_picture >= 10:
@@ -213,6 +216,7 @@ while True:
         window["-IMAGE-"].update(filename=picture_path(level, i_picture))
         eval_picture = str(picture_path(level, i_picture))
         window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
+        eval_attempts = 0
 
     if event == "-NO-":
         # hiding and unhiding
@@ -231,13 +235,13 @@ while True:
             current_pic.mark(guess)
             window["-IMAGE-"].update(filename=picture_path(level, i_picture, guess=True))
             #window["-INPUT-"].update("")
-            eval_marked_picture = str(picture_path(level, i_picture, guess=True))
 
-        
-            eval_response = "no"
-            with open("evaluation.csv", "a", encoding="utf-8") as f:
-                line = eval_picture + "," + eval_input + "," + eval_marked_picture + "," + eval_response + "\n"
-                f.writelines(line)
+            eval_attempts += 1
+            #eval_marked_picture = str(picture_path(level, i_picture, guess=True))
+            #eval_response = "no"
+            #with open("evaluation.csv", "a", encoding="utf-8") as f:
+                #line = eval_picture + "," + eval_input + "," + eval_marked_picture + "," + eval_response + "\n"
+                #f.writelines(line)
         except StopIteration:
             window["-YES-"].hide_row()
             window["-ENTER-"].unhide_row()
