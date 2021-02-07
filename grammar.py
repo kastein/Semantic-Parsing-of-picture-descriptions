@@ -57,7 +57,7 @@ __email__ = "See the authors' websites"
 import sys
 from collections import defaultdict
 from itertools import product
-from world import *
+#from world import *
 
 
 
