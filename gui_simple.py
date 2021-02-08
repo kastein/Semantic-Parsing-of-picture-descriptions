@@ -7,6 +7,7 @@ from PictureLevel import *
 from Semantic_Learner import evaluate_semparse
 import math
 from collections import defaultdict
+from cossimforstem import sim_stemm
 
 crude_lexicon={}
 crude_rule = [('THE', 'the'),('LR', 'right'),('LR', 'left'),('TO', 'to'),('NEXT', 'next'),('B','[]'),('B','[(lambda b: b.shape == "rectangle")]'),('B','[(lambda b: b.shape == "triangle")]'),('B','[(lambda b: b.shape == "circle")]'),('C','green'),('C','yellow'),('C','blue'),('C','red'),('E','exist'),('I','identy'),('N','[2]'),('N','[3]'),('N','range(1,17)'),('N','[1]'),('U','under'),('U','over'),('AND','und')]
@@ -15,34 +16,32 @@ total_scores = defaultdict(lambda:defaultdict(int))
 
 starting_screen = [
     [
-        sg.Text("Hello! -Description- Press 'Start Game' to start the game", text_color='white', background_color='black'),
-        sg.Button("Start Game", key="-START-", button_color=('black', 'grey'))
+        sg.Text("Hello! -Description- Press 'Start Game' to start the game"),
+        sg.Button("Start Game", key="-START-")
     ]
 ]
 
 game_screen = [
     [
-        sg.Text("Level xx, Picture xx:", key="-LEVEL-", text_color="white", background_color="black")
+        sg.Text("Level 0, Picture 0:", key="-LEVEL-")
     ],
     [
-        sg.Button("Press here to show first picture", key="-NEXT-", button_color=("black", "grey"))
+        sg.Button("Press here to show first picture", key="-NEXT-")
     ],
     [
-        sg.Image(key="-IMAGE-")
+        sg.Image(key="-IMAGE-")  # try to read in jpg.files
     ],
     [
-        sg.Text("Describe the picture:", key="-INSTRUCTION-", text_color="white", background_color="black"), # store what is being typed, when person hits enter
-        sg.In(size=(25, 1), enable_events=True, key="-INPUT-"),
-        sg.Button("Enter", key="-ENTER-", button_color=("black", "grey"))
+        sg.Text("Describe the picture:", key="-INSTRUCTION-"), # store what is being typed, when person hits enter
+        sg.In(size=(25, 1), enable_events=True, key="-INPUT-", disabled=True),
+        sg.Button("Enter", key="-ENTER-", visible=False)
     ],
     [
-        sg.Text("Did you refer to this?", text_color="white", background_color="black"),
-        sg.Button("YES", key="-YES-", button_color=("black", "grey")),
-        sg.Button("NO", key="-NO-", button_color=("black", "grey"))
+        sg.Text("Did you refer to this?"),
+        sg.Button("YES", key="-YES-"),
+        sg.Button("NO", key="-NO-")
     ]
 ]
-
-sg.theme('Black')
 
 
 layout_starting_screen = [
@@ -75,11 +74,10 @@ def picture_path(level, i_picture, session_name="pictures", guess=False):
     return path_pict
 
 with open("evaluation.csv", "w", encoding="utf-8") as f:
-    first_line = "level\tpicture\tinput\tmarked_picture\tattempts\ttree\n"
+    first_line = "picture,input,marked_picture,response\n"
     f.writelines(first_line)
 
 inpt = ""
-
 
 while True:
     event, values = window.read()
@@ -92,23 +90,19 @@ while True:
     if event == "-START-":
         window.close()
         window = actualgame
-        #window.read()
-        #window["-ENTER-"].hide_row()
-        #window["-YES-"].hide_row()
 
     # Displaying picture and taking input
     if event == "-NEXT-":
         guessed_blocks.clear()
         # hiding and unhiding
-        #window["-ENTER-"].update(button_color=("black", "grey"))
         window["-NEXT-"].hide_row()
         window["-YES-"].hide_row()
-        #window["-INPUT-"].update(disabled=False)
-        #window["-ENTER-"].update(visible=True)
+        window["-INPUT-"].update(disabled=False)
+        window["-ENTER-"].update(visible=True)
    
         if i_picture >= 10:
             i_picture = 0
-            level += 1
+            #level += 1
         i_picture += 1
         current_pic = setPicParameters(level, i_picture, session_name)
         current_pic.draw()
@@ -118,18 +112,15 @@ while True:
         eval_picture = str(picture_path(level, i_picture))
         window["-INSTRUCTION-"].update("Describe the picture:")
         window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
-        eval_attempts = 0
 
     if event == "-INPUT-":
         inpt = values["-INPUT-"]
 
     if event == "-ENTER-":
         # hiding and unhiding
-        window["-INPUT-"].update(disabled=True)
-        window["-ENTER-"].update(visible=False)
-        #window["-ENTER-"].hide_row()
+        window["-ENTER-"].hide_row()
         window["-YES-"].unhide_row()
-        inpt = inpt.lower()
+        inpt = sim_stemm(inpt.lower(),list(crude_lexicon))
         print(inpt)
         eval_input = inpt
    
@@ -158,11 +149,11 @@ while True:
             for b in guessed_blocks:
                 guess.append((b.y, b.x))
             guessed_blocks.clear()
-            #print(lf)
 
             # mark the guessed blocks in the picture
             current_pic.mark(guess)
             window["-IMAGE-"].update(filename=picture_path(level, i_picture, guess=True))
+            window["-INPUT-"].update("")
             eval_marked_picture = str(picture_path(level, i_picture, guess=True))
         except StopIteration:
             pass
@@ -171,12 +162,7 @@ while True:
         guessed_blocks.clear()
         # hiding and unhiding
         window["-YES-"].hide_row()
-        #window["-ENTER-"].unhide_row()
-        window["-INPUT-"].update(disabled=False)
-        window["-ENTER-"].update(visible=True)
-
-        window["-INPUT-"].update("")
-
+        window["-ENTER-"].unhide_row()
         weights = evaluate_semparse(inpt,lf,gram)
         print("TEST",[weights[key] for key in weights],[0.0 for word in inpt],len(inpt.split()))
         if [weights[key] for key in weights] == [0.0 for word in inpt.split()]:
@@ -199,17 +185,14 @@ while True:
         gram = Grammar(crude_lexicon,rules,functions)
         for word in crude_lexicon:
             print(word,len(crude_lexicon[word]))
-
-        print(lf)
-        #eval_response = "yes"
-        eval_attempts += 1
+        eval_response = "yes"
         with open("evaluation.csv", "a", encoding="utf-8") as f:
-            line = str(level) + "\t" + eval_picture + "\t" + eval_input + "\t" + eval_marked_picture + "\t" + str(eval_attempts) + "\t" + str(lf) + "\n"
+            line = eval_picture + "," + eval_input + "," + eval_marked_picture + "," + eval_response + "\n"
             f.writelines(line)
 
         if i_picture >= 10:
             i_picture = 0
-            level += 1
+            #level += 1
         i_picture += 1
         current_pic = setPicParameters(level, i_picture, session_name)
         current_pic.draw()
@@ -218,10 +201,10 @@ while True:
         window["-IMAGE-"].update(filename=picture_path(level, i_picture))
         eval_picture = str(picture_path(level, i_picture))
         window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
-        eval_attempts = 0
 
     if event == "-NO-":
         # hiding and unhiding
+        # yet to come
         # ask for next guess from parser
         guessed_blocks.clear()
         try:
@@ -236,20 +219,20 @@ while True:
             guessed_blocks.clear()
             current_pic.mark(guess)
             window["-IMAGE-"].update(filename=picture_path(level, i_picture, guess=True))
-            #window["-INPUT-"].update("")
+            window["-INPUT-"].update("")
+            eval_marked_picture = str(picture_path(level, i_picture, guess=True))
 
-            eval_attempts += 1
-            #eval_marked_picture = str(picture_path(level, i_picture, guess=True))
-            #eval_response = "no"
-            #with open("evaluation.csv", "a", encoding="utf-8") as f:
-                #line = eval_picture + "," + eval_input + "," + eval_marked_picture + "," + eval_response + "\n"
-                #f.writelines(line)
+        
+            eval_response = "no"
+            with open("evaluation.csv", "a", encoding="utf-8") as f:
+                line = eval_picture + "," + eval_input + "," + eval_marked_picture + "," + eval_response + "\n"
+                f.writelines(line)
         except StopIteration:
             window["-YES-"].hide_row()
             window["-ENTER-"].unhide_row()
             if i_picture >= 10:
                 i_picture = 0
-                level += 1
+                #level += 1
             i_picture += 1
             current_pic = setPicParameters(level, i_picture, session_name)
             current_pic.draw()
