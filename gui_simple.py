@@ -1,7 +1,7 @@
 import PySimpleGUI as sg
 from BlockPictureGenerator import Picture
 from grammar import *
-import os.path
+import os
 from PIL import Image, ImageTk
 from PictureLevel import *
 from Semantic_Learner import evaluate_semparse
@@ -16,8 +16,11 @@ total_scores = defaultdict(lambda:defaultdict(int))
 
 starting_screen = [
     [
-        sg.Text("Hello! -Description- Press 'Start Game' to start the game"),
-        sg.Button("Start Game", key="-START-")
+        sg.Text("Hello! -Description- Press 'Start Game' to start the game. Please enter session name:")
+    ],
+    [
+        sg.In(size=(25, 1), enable_events=True, key="-SESSION-"),
+        sg.Button("Start Game", key="-START-", disabled=True)
     ]
 ]
 
@@ -62,20 +65,16 @@ window = start
 
 level = 1
 i_picture = 0
-session_name = "pictures"
+#session_name = "pics"
 
 
-def picture_path(level, i_picture, session_name="pictures", guess=False):
+def picture_path(level, i_picture, session_name, guess=False):
     if not guess:
         file_name = session_name + "_L" + str(level) + "_" + str(i_picture) + ".png"
     else:
         file_name = session_name + "_L" + str(level) + "_" + str(i_picture) + "_guess.png"
     path_pict = "./" + session_name + "/" + file_name
     return path_pict
-
-with open("evaluation.csv", "w", encoding="utf-8") as f:
-    first_line = "picture,input,marked_picture,response\n"
-    f.writelines(first_line)
 
 inpt = ""
 
@@ -88,8 +87,17 @@ while True:
 
     # Beginning screen
     if event == "-START-":
+        os.mkdir(session_name)
+        evaluation_file = "./" + session_name + "/evaluation.csv"
+        with open(evaluation_file, "w", encoding="utf-8") as f:
+            first_line = "picture,input,marked_picture,response\n"
+            f.writelines(first_line)
         window.close()
         window = actualgame
+
+    if event == "-SESSION-":
+        session_name = values["-SESSION-"]
+        window["-START-"].update(disabled=False)
 
     # Displaying picture and taking input
     if event == "-NEXT-":
@@ -108,8 +116,8 @@ while True:
         current_pic.draw()
         # Katharina added following line
         create_all_blocks(current_pic)
-        window["-IMAGE-"].update(filename=picture_path(level, i_picture))
-        eval_picture = str(picture_path(level, i_picture))
+        window["-IMAGE-"].update(filename=picture_path(level, i_picture, session_name))
+        eval_picture = str(picture_path(level, i_picture, session_name))
         window["-INSTRUCTION-"].update("Describe the picture:")
         window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
 
@@ -152,9 +160,9 @@ while True:
 
             # mark the guessed blocks in the picture
             current_pic.mark(guess)
-            window["-IMAGE-"].update(filename=picture_path(level, i_picture, guess=True))
+            window["-IMAGE-"].update(filename=picture_path(level, i_picture, session_name, guess=True))
             window["-INPUT-"].update("")
-            eval_marked_picture = str(picture_path(level, i_picture, guess=True))
+            eval_marked_picture = str(picture_path(level, i_picture, session_name, guess=True))
         except StopIteration:
             pass
 
@@ -186,7 +194,7 @@ while True:
         for word in crude_lexicon:
             print(word,len(crude_lexicon[word]))
         eval_response = "yes"
-        with open("evaluation.csv", "a", encoding="utf-8") as f:
+        with open(evaluation_file, "a", encoding="utf-8") as f:
             line = eval_picture + "," + eval_input + "," + eval_marked_picture + "," + eval_response + "\n"
             f.writelines(line)
 
@@ -198,8 +206,8 @@ while True:
         current_pic.draw()
         # Katharina added following line
         create_all_blocks(current_pic)
-        window["-IMAGE-"].update(filename=picture_path(level, i_picture))
-        eval_picture = str(picture_path(level, i_picture))
+        window["-IMAGE-"].update(filename=picture_path(level, i_picture, session_name))
+        eval_picture = str(picture_path(level, i_picture, session_name))
         window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
 
     if event == "-NO-":
@@ -218,13 +226,12 @@ while True:
                 guess.append((b.y, b.x))
             guessed_blocks.clear()
             current_pic.mark(guess)
-            window["-IMAGE-"].update(filename=picture_path(level, i_picture, guess=True))
+            window["-IMAGE-"].update(filename=picture_path(level, i_picture, session_name, guess=True))
             window["-INPUT-"].update("")
-            eval_marked_picture = str(picture_path(level, i_picture, guess=True))
+            eval_marked_picture = str(picture_path(level, i_picture, session_name, guess=True))
 
-        
             eval_response = "no"
-            with open("evaluation.csv", "a", encoding="utf-8") as f:
+            with open(evaluation_file, "a", encoding="utf-8") as f:
                 line = eval_picture + "," + eval_input + "," + eval_marked_picture + "," + eval_response + "\n"
                 f.writelines(line)
         except StopIteration:
@@ -238,7 +245,7 @@ while True:
             current_pic.draw()
             # Katharina added following line
             create_all_blocks(current_pic)
-            window["-IMAGE-"].update(filename=picture_path(level, i_picture))
+            window["-IMAGE-"].update(filename=picture_path(level, i_picture, session_name))
             eval_picture = str(picture_path(level, i_picture))
             window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
         
