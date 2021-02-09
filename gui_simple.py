@@ -91,7 +91,7 @@ while True:
         os.mkdir(session_name)
         evaluation_file = "./" + session_name + "/evaluation.csv"
         with open(evaluation_file, "w", encoding="utf-8") as f:
-            first_line = "level\tpicture\tinput\tmarked_picture\tattempts\ttree\n"
+            first_line = "n\tlevel\tpicture\tinput\tmarked_picture\tattempts\ttree\n"
             f.writelines(first_line)
         window.close()
         window = actualgame
@@ -108,7 +108,8 @@ while True:
         window["-YES-"].hide_row()
         window["-INPUT-"].update(disabled=False)
         window["-ENTER-"].update(visible=True)
-   
+
+        n = 1
         if i_picture >= 10:
             i_picture = 0
             level += 1
@@ -204,9 +205,10 @@ while True:
         eval_response = "yes"
         eval_attempts += 1
         with open(evaluation_file, "a", encoding="utf-8") as f:
-            line = str(level) + "\t" + eval_picture + "\t" + eval_input + "\t" + eval_marked_picture + "\t" + str(eval_attempts) + "\t" + str(lf) + "\n"
+            line = str(n) + "\t" + str(level) + "\t" + eval_picture + "\t" + eval_input + "\t" + eval_marked_picture + "\t" + str(eval_attempts) + "\t" + str(lf) + "\n"
             f.writelines(line)
 
+        n += 1
         if i_picture >= 10:
             i_picture = 0
             level += 1
