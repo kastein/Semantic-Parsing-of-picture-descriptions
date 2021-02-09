@@ -2,7 +2,7 @@ import random
 from tkinter import *
 from PIL import Image, ImageDraw, ImageColor
 import os
-from CalculCoordinates import *
+#from CalculCoordinates import *
 
 
 # Define the Colours
