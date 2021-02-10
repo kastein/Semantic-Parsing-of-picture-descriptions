@@ -49,11 +49,12 @@ game_screen = [
     [
         sg.Text("Did you refer to this?"),
         sg.Button("YES", key="-YES-", disabled=True),
-        sg.Button("NO", key="-NO-", disabled=True)
+        sg.Button("NO", key="-NO-", disabled=True),
+        sg.Button("SKIP", key="-SKIP-", disabled=True)
     ],
     [
         sg.Text(
-            "This will show up after you have entered your sentence.\nThe program will make a guess about what part of the picture your description was referring to by marking it with a black frame.\nPlease only click YES when ALL of the corresponding positions are marked.\n",
+            "This will show up after you have entered your sentence.\nThe program will make a guess about what part of the picture your description was referring to by marking it with a black frame.\nPlease only click YES when ALL of the corresponding positions are marked.\nIf you accidentally entered a wrong description you can use SKIP to go on with the next picture.\n",
             key="-FEEDBACKINSTR-"
         )
     ],
@@ -134,6 +135,7 @@ while True:
         window["-FEEDBACKINSTR-"].hide_row()
         window["-YES-"].update(disabled=False)
         window["-NO-"].update(disabled=False)
+        window["-SKIP-"].update(disabled=False)
         window["-YES-"].hide_row()
         #window["-ENTER-"].update(visible=True)
         window["-NEXTINSTR-"].hide_row()
@@ -293,7 +295,21 @@ while True:
             window["-IMAGE-"].update(filename=picture_path(level, i_picture, session_name))
             eval_picture = str(picture_path(level, i_picture, session_name))
             window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
-        
+
+
+    if event == "-SKIP-":
+        with open(evaluation_file, "a", encoding="utf-8") as f:
+            line = str(level) + "\t" + eval_picture + "\t" + eval_input + "\t" + eval_marked_picture + "\t" + "SKIPPED" + "\t" + str(lf) + "\n"
+            f.writelines(line)
+
+        current_pic = setPicParameters(level, i_picture, session_name)
+        current_pic.draw()
+        # Katharina added following line
+        create_all_blocks(current_pic)
+        window["-IMAGE-"].update(filename=picture_path(level, i_picture, session_name))
+        eval_picture = str(picture_path(level, i_picture, session_name))
+        window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
+        eval_attempts = 0
        
 
 window.close()
