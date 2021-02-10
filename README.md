@@ -35,8 +35,8 @@ For the detailed instructions and examples please refer to the [Wiki](https://gi
 * folder marked_pictures: pictures with guessed blocks for the test sentences
 * folder pictures: example pictures as created by PictureLevel.py
 
-* BlockPictureGenerator.py: automatically creates and saves the pictures 
-* CalculCoordinates.py: used to calculate the coordinates for the picture generation in BlockPictureGenerator.py
+* BlockPictureGenerator.py: automatically creates and saves the pictures **documented**
+* CalculCoordinates.py: used to calculate the coordinates for the picture generation in BlockPictureGenerator.py **documented**
 * PictureLevel.py: generates a picture for a specified level by calling BlockPictureGenerator.py with corresponding parameters
 * grammar.py:
 * gui_simple: working GUI
