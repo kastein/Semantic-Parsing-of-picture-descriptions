@@ -18,6 +18,7 @@ Python 3 <br>
 tkinter <br>
 PIL <br>
 PySimpleGUI <br>
+Numpy <br>
 
 ## Basic Instructions 
 
