@@ -33,7 +33,7 @@ game_screen = [
         sg.Text("Level xx, Picture xx:", key="-LEVEL-")
     ],
     [
-        sg.Text("only describe one block, e.g.: 'There is a red circle'", key="-DESCRIPTION-")
+        sg.Text("this is some sort of verrrrry loooooooooong description", key="-DESCRIPTION-")
     ],
     [
         sg.Button("Press here to show first picture", key="-NEXT-")
@@ -70,9 +70,12 @@ start = sg.Window("Hello!", layout_starting_screen)
 actualgame = sg.Window("Language Game", layout_game_screen, return_keyboard_events=True)
 window = start
 
-level = 1
+level = 3
 i_picture = 0
-#session_name = "pics"
+
+level1 = "only describe one block, e.g.: 'There is a red circle'"
+level2 = "describe one or more blocks, e.g: 'There are two blue forms'"
+level3 = "describe relations between blocks, e.g.: 'There is a red circle under a blue square'"
 
 
 def picture_path(level, i_picture, session_name, guess=False):
@@ -116,9 +119,7 @@ while True:
         window["-ENTER-"].update(visible=True)
 
         n = 1
-        if i_picture >= 10:
-            i_picture = 0
-            level += 1
+        window["-DESCRIPTION-"].update(level1)
         i_picture += 1
         current_pic = setPicParameters(level, i_picture, session_name)
         current_pic.draw()
@@ -218,7 +219,12 @@ while True:
         if i_picture >= 10:
             i_picture = 0
             level += 1
-            window["-DESCRIPTION-"].update("something else")
+            if level == 2:
+                window["-DESCRIPTION-"].update(level2)
+            elif level == 3:
+                window["-DESCRIPTION-"].update(level3)
+            else:
+                print("thank you for participating!")
         i_picture += 1
         current_pic = setPicParameters(level, i_picture, session_name)
         current_pic.draw()
@@ -254,6 +260,10 @@ while True:
         except StopIteration:
             window["-YES-"].hide_row()
             window["-ENTER-"].unhide_row()
+            window["-INPUT-"].update(disabled=False)
+            window["-ENTER-"].update(visible=True)
+            window["-INPUT-"].update("")
+
             if i_picture >= 10:
                 i_picture = 0
                 level += 1
@@ -263,7 +273,7 @@ while True:
             # Katharina added following line
             create_all_blocks(current_pic)
             window["-IMAGE-"].update(filename=picture_path(level, i_picture, session_name))
-            eval_picture = str(picture_path(level, i_picture))
+            eval_picture = str(picture_path(level, i_picture, session_name))
             window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
         
        
