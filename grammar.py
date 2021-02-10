@@ -1,32 +1,14 @@
 #!/usr/bin/env python
 
 """
-Implements a simple framework for defining grammars of the sort given
-in table 1 of the paper. Use
 
-python grammar.py
+"""
 
-to run the demo, which creates the training and testing data used in
-`synthesis.py`.
 
+"""
 To see how the implementation works, it's probably easiest to study
 gold_lexicon, rules, and functions below. Together, these implement
 the example in table 1.
-
-The only real difference from the paper is that this implementation
-creates only binary branching structures, so that we can use the
-familiar CYK parsing algorithm (in `Grammar.gen`). Thus, the
-structures are like this:
-
-three plus minus two
-
-[('N', 'add(3)(neg(2))'), 
-    [('B', 'add(3)'), 
-        [('N', '3'), 'three'], 
-        [('R', 'add'), 'plus']], 
-    [('N', 'neg(2)'), 
-        [('U', 'neg'), 'minus'], 
-        [('N', '2'), 'two']]]
 
 To create new grammars, you just need to define the following:
 
@@ -45,7 +27,6 @@ To create new grammars, you just need to define the following:
   empty.
 """
 
-
 __author__ = "Christopher Potts and Percy Liang"
 __credits__ = []
 __license__ = "GNU general public license, version 2"
@@ -57,20 +38,24 @@ __email__ = "See the authors' websites"
 import sys
 from collections import defaultdict
 from itertools import product
-#from world import *
 
-
-
+# variable to store all blocks of the current picture
 allblocks = []
+# variable to store the guessed blocks for an input utterance
 guessed_blocks = set()
+# only needed when running this script separately for demo or testing purpose
 all_blocks_grid = []
 
 
 
 def create_all_blocks(picture):
+    """
+    updates the allblocks by resetting and then adding all blocks of the Picture object
+    :param picture: a Picture object as defined in BlockPictureGenerator.py
+    :return: None
+    """
     allblocks.clear()
     grid = picture.grid
-    #all_blocks_grid = grid.copy()
     for row in grid:
         for b in row:
             if b:
@@ -78,22 +63,27 @@ def create_all_blocks(picture):
     return None
     
 
-def positiontest(blocks,blocklocations,position):
+def position_test(blocks,block_locations,position):
     """
     finds all pairs of blocks b1 form blocks and b2 from blocklocations that stand in relation position to eachother
-    e.g. blocks is a list of all blue rectangles and blocklocations a list of all red circles and position is 'u' then the function returns
-    all blocks that are blue rectangles and are below red circles
-    blocks and blocklocations: two lists of blocks  
-    position: 'u' for under or 'o' for over
+    e.g. blocks is a list of all blue rectangles and block_locations a list of all red circles and position is 'u'
+    then the function returns all blocks that are blue rectangles and are below red circles
+    additionally updates guessed blocks by removing all blocks from guessed_blocks that do not match, e.g. removes all
+    blue rectangles that are not below a red circle and removes all red circles that are not above a blue rectangle
+    :param blocks: list of blocks
+    :param block_locations: list of blocks
+    :param position: string for the relative position
+    :return: list of all blocks from blocks that stand in relation position to any block in block_locations
     """
     fulfill = []
     checked = set()
     passed_check = set()
 
     for b1 in blocks:
-        for b2 in blocklocations:
+        for b2 in block_locations:
             checked.add(b1)
             checked.add(b2)
+            
             if position == "u":
                 if b1.y > b2.y:
                     fulfill.append(b1)
@@ -107,7 +97,7 @@ def positiontest(blocks,blocklocations,position):
                     passed_check.add(b2)
  
             elif position == "n":
-                if b1.y == b2.y and b1.x == b2.x+1 or b1.x == b2.x-1:
+                if b1.y == b2.y and (b1.x == b2.x+1 or b1.x == b2.x-1):
                     fulfill.append(b1)
                     passed_check.add(b1)
                     passed_check.add(b2)
@@ -124,7 +114,6 @@ def positiontest(blocks,blocklocations,position):
                     passed_check.add(b1)
                     passed_check.add(b2)
 
-
     for bl in checked:
         if bl not in passed_check:
             guessed_blocks.remove(bl)
@@ -132,10 +121,11 @@ def positiontest(blocks,blocklocations,position):
     return fulfill
     
 
-def blockfilter(conditions,blocks):
+def block_filter(conditions,blocks):
     """
-    returns a list of all blocks that match the specific conditions
-    conditions: list of conditions, e.g. shape == rectangle or color == 
+    returns a list of all blocks that match the specific conditions and updates guessed_blocks by adding those blocks
+    :param conditions: list of conditions, e.g. shape == rectangle or color == green
+    :return: a list of all blocks in blocks that fulfill the conditions
     """
     fulfill = []
     for b in blocks:
@@ -144,7 +134,6 @@ def blockfilter(conditions,blocks):
             test = test and c(b)
         if test:
             fulfill.append(b)
-            #guessed_blocks.add(b)
     guessed_blocks.update(fulfill)
     return fulfill
 
@@ -152,6 +141,7 @@ def blockfilter(conditions,blocks):
 
 
 class Grammar:
+
     def __init__(self, lexicon, rules, functions):
         """For examples of these arguments, see below."""
         self.lexicon = lexicon
@@ -197,9 +187,6 @@ class Grammar:
                 parse_trees += self.recursive_treebuild((l,x,y))
         return parse_trees
         
-        
-        
-        
 
     def gen(self, s):
         """CYK parsing, but we just keep the full derivations. The input
@@ -225,6 +212,7 @@ class Grammar:
         # Return only full parses, from the upper right of the chart:
         #return buildtrees(trace[(0,n-1)])
         return self.compute_parse_trees(n-1)
+    
 
     def allcombos(self, c1, c2):
         """Given any two nonterminal node labels, find all the ways
@@ -246,9 +234,9 @@ class Grammar:
         for key, val in list(self.functions.items()):
             setattr(grammar, key, val)
         return eval(lf[0][1]) # Interpret just the root node's semantics. 
-# The lexicon for our pictures 
 
 
+# The lexicon for our pictures
 gold_lexicon = {
     'form':[('B','[]')],
     'forms':[('B','[]')],
@@ -301,8 +289,6 @@ rules = [
     ['TS','SIDE','PP',(0,1)],
     ['TO','THE','TS',(0,1)],
     ['LR','TO','SIDE',(1,0)]
-    
-    
 ]
 
 # These are needed to interpret our logical forms with eval. They are
@@ -310,30 +296,42 @@ rules = [
 functions = {
     'block': (lambda conditions: (lambda number_requirement: (number_requirement,conditions))),
     'identy': (lambda x: x),
-    'exist': (lambda n : (lambda b: len(blockfilter(b,allblocks)) in n)),
+    'exist': (lambda n : (lambda b: len(block_filter(b, allblocks)) in n)),
     'und':(lambda v1:(lambda v2: v1 and v2)),
     'blue': (lambda x: x+[(lambda b:b.colour=="blue")]),
     'red': (lambda x: x+[(lambda b:b.colour=="red")]),
     'green': (lambda x: x+[(lambda b:b.colour=="green")]),
     'yellow':(lambda x: x+[(lambda b:b.colour=="yellow")]),
-    'under':(lambda n: (lambda x:(lambda y: [(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"u")) in n and b in positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"u"))]))),
-    'over':(lambda n: (lambda x:(lambda y: [(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"o")) in n and b in positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"o"))]))),
-    'next':(lambda n: (lambda x:(lambda y: [(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"n")) in n and b in positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"n"))]))),
-    'left':(lambda n: (lambda x:(lambda y: [(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"l")) in n and b in positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"l"))]))),
-    'right':(lambda n: (lambda x:(lambda y: [(lambda b: len(positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"r")) in n and b in positiontest(blockfilter(y,allblocks),blockfilter(x,allblocks),"r"))]))),
+    'under':(lambda n: (lambda x:(lambda y: [(lambda b: len(position_test(block_filter(y, allblocks), block_filter(x,allblocks),
+                                                                          "u")) in n and b in position_test(
+        block_filter(
+            y, allblocks), block_filter(x, allblocks), "u"))]))),
+    'over':(lambda n: (lambda x:(lambda y: [(lambda b: len(position_test(block_filter(y, allblocks), block_filter(x,allblocks),
+                                                                         "o")) in n and b in position_test(block_filter(
+        y, allblocks), block_filter(x, allblocks), "o"))]))),
+    'next':(lambda n: (lambda x:(lambda y: [(lambda b: len(position_test(block_filter(y, allblocks), block_filter(x, allblocks),
+                                                                         "n")) in n and b in position_test(block_filter(
+        y, allblocks), block_filter(x, allblocks), "n"))]))),
+    'left':(lambda n: (lambda x:(lambda y: [(lambda b: len(position_test(block_filter(y, allblocks), block_filter(x,allblocks),
+                                                                         "l")) in n and b in position_test(block_filter(
+        y, allblocks), block_filter(x, allblocks), "l"))]))),
+    'right':(lambda n: (lambda x:(lambda y: [(lambda b: len(position_test(block_filter(y, allblocks), block_filter(x,allblocks),
+                                                                          "r")) in n and b in position_test(
+        block_filter(
+            y, allblocks), block_filter(x, allblocks), "r"))]))),
     'to':(lambda x: x),
     'the':(lambda x: x)
     
 }
 
 
-# Main is used for testing the gramamr with the test sentences from semdata.py 
+# Main is used for testing the grammar with the test sentences from semdata.py
+# Run the main for a simple demo of our grammar with respect to a
 
 if __name__ == '__main__':
 
-    # Simple demo with the test data:
     from semdata import test_utterances
-
+    from world import *
 
     # creates the grammar 
     gram = Grammar(gold_lexicon, rules, functions)
@@ -348,7 +346,7 @@ if __name__ == '__main__':
     allblocks=allblocks2
 
     # parses all test sentences from semdata.py
-    # prints the derived logical forms for each test sentence and whether the test sentence is true with respect to the example pictuer world.png
+    # prints the derived logical forms for each test sentence and whether the test sentence is true with respect to the example picture world.png
     for i,u in enumerate(test_utterances):
 
         # creates the global variable for keeping track of which block is / blocks are the described one(s)
