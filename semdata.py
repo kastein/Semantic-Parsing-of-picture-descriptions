@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
 """
-Generates the dataset used for training and evaluating the semantic
-model defined in `synthesis.py`. The basis for this is `gold_lexicon`
-and its grammar, as defined in `grammar.py`.
+This file contains the training and test sentences used for developing,
+testing and debugging our grammar for SHAPELURN
+The functions at the end generate a training data set and a test data set
+based on the gold lexicon and the grammar in grammar.py
+The code is taken from Christopher Potts and Percy Liang (see below) and
+we replaced their train and test utterances with our sentences
 """
 
 __author__ = "Christopher Potts and Percy Liang"
@@ -56,6 +59,7 @@ test_utterances = [
     'there is a yellow square to the left of a blue triangle',
     'there is a yellow square to the right of a blue triangle'
     ]
+
 # should all evaluate to true
 test_utterances = [
     'there is a blue triangle',
@@ -72,14 +76,6 @@ test_utterances = [
 ]
 
 # Test Utterances for world2.jpg
-# Are not yet working
-test_utterances = [
-    'there is a yellow circle over a blue circle',
-    'there is a red triangle over a yellow triangle',
-    'there is a yellow triangle under a red triangle',
-    'there is a red triangle under a yellow triangle',
-    'there is a yellow triangle over a red triangle',
-    'there is a blue triangle under a red triangle under a yellow triangle']
 
 # Are all working
 test_utterances2 = [
@@ -92,8 +88,15 @@ test_utterances2 = [
     'there is a green circle to the right of a red circle',
     'there are two green circles under a blue circle',
     'there is a green form next to a green form',
-    'there is a blue circle under a blue circle'
+    'there is a blue circle under a blue circle',
+    'there is a yellow circle over a blue circle',
+    'there is a red triangle over a yellow triangle',
+    'there is a yellow triangle under a red triangle',
+    'there is a red triangle under a yellow triangle',
+    'there is a yellow triangle over a red triangle',
+    'there is a blue triangle under a red triangle under a yellow triangle'
 ]
+
 
 # This is a list of triples (x, y, d), where x is an input string, y
 # is its preferred logical form, and d is the denotation of the
@@ -105,6 +108,7 @@ for u in train_utterances:
     # to correspond to the preferences we expressed in the paper:
     lf = gram.gen(u)[0] 
     sem_train.append([u, lf, gram.sem(lf)])
+
 
 # A list of triples with the same format as the training data; the
 # algorithms should do well on the first three and fail on the last
