@@ -19,14 +19,16 @@ tkinter <br>
 PIL <br>
 PySimpleGUI <br>
 
-## (Draft for) Instructions 
+## Basic Instructions 
 
-Welcome to SHAPELURN!<br>
-In this interactive language learning game, you will teach the computer a language of your choice (see below for restrictions for the current Prototype version).
-You will see pictures displaying simple geometric forms of different colours and shapes. Your task is to describe a part of the picture and the computer has to guess which of the objects of the picture you describe. However, at the beginning the computer doesn't know any words of your language (or any language at all). Therefore, you have to teach it your language by providing feedback such that the computer can learn from you. <br>
-Your goal for this game is that the computer becomes better and better in guessing the correct answer during the progress of the game. 
+Hello! Welcome to SHAPELURN, where you can teach the computer any language of your choice!<br>
+You will be looking at different pictures and describing them to the computer in one sentence. <br>
+Please use rather short sentences and try not to use negation and conjunction."
 
-For the detailed instructions please refer to the [Wiki](https://github.com/itsLuisa/Semantic-Parsing-of-picture-descriptions/wiki)
+In order to evaluate our model we would like to collect your data.<br>
+Please enter any name under which you would like to save your data.
+
+For the detailed instructions and examples please refer to the [Wiki](https://github.com/itsLuisa/Semantic-Parsing-of-picture-descriptions/wiki)
 
 
 ## Files 
