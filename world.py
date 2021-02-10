@@ -1,3 +1,8 @@
+"""
+only used for demonstration of grammar.py
+creates a list of blocks corresponding to the picture world2.png
+"""
+
 class Block:
     """
     Object Block has attributes colour and x and y coordinate
@@ -31,7 +36,7 @@ def set_all_coordinates(chart):
                 
     
 
-
+# for the simple world.png picture
 one = Block("blue","rectangle")
 two = Block("blue","rectangle")
 three = Block("blue","triangle")
@@ -40,6 +45,7 @@ five = Block("red","triangle")
 
 world = [[None,one,two,None],[three,None,None,four],[None,five,None,None],[None,None,None,None]]
 
+# for the world2.png picture
 one = Block("red","triangle")
 two = Block("blue","circle")
 three = Block("red","circle")
