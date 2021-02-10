@@ -37,7 +37,7 @@ For the detailed instructions and examples please refer to the [Wiki](https://gi
 
 * BlockPictureGenerator.py: automatically creates and saves the pictures **documented**
 * CalculCoordinates.py: used to calculate the coordinates for the picture generation in BlockPictureGenerator.py **documented**
-* PictureLevel.py: generates a picture for a specified level by calling BlockPictureGenerator.py with corresponding parameters
+* PictureLevel.py: generates a picture for a specified level by calling BlockPictureGenerator.py with corresponding parameters **documented**
 * grammar.py:
 * gui_simple: working GUI
 * learning.py: the Stochastic Gradient Descent learn algorithm
