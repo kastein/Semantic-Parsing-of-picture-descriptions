@@ -42,3 +42,4 @@ For the detailed instructions and examples please refer to the [Wiki](https://gi
 * gui_simple: working GUI
 * learning.py: the Stochastic Gradient Descent learn algorithm
 * semdata.py: training and test sentences
+* cosimforstem.py: cosine similarity based heuristic for stemming words from an unknown language **documented**
