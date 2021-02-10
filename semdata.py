@@ -78,7 +78,7 @@ test_utterances = [
 # Test Utterances for world2.jpg
 
 # Are all working
-test_utterances2 = [
+test_utterances = [
     'there are three blue circles',
     'there are two red triangles',
     'there is a green square',
