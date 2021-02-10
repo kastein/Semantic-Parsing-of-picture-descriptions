@@ -16,13 +16,13 @@ total_scores = defaultdict(lambda:defaultdict(int))
 
 starting_screen = [
     [
-        sg.Text("Hello! -Description-\nthis is a test")
+        sg.Text("Hello! Welcome to SHAPELURN, where you can teach the computer any language of your choice!\nYou will be looking at different pictures and describing them to the computer in one sentence.\nPlease use rather short sentences and try not to use negation and conjunction.")
     ],
     [
-       sg.Text("Press 'Start Game' to start the game.")
+       sg.Text("In order to evaluate our model we would like to collect your data.\nPlease enter any name under which you would like to save your data.")
     ],
     [
-        sg.Text("Please enter session name:"),
+        sg.Text("Enter session name:"),
         sg.In(size=(25, 1), enable_events=True, key="-SESSION-"),
         sg.Button("Start Game", key="-START-", disabled=True)
     ]
@@ -30,13 +30,10 @@ starting_screen = [
 
 game_screen = [
     [
-        sg.Text("Level xx, Picture xx:", key="-LEVEL-")
+        sg.Text("Level xx, Picture xx: <- This is the level display, you will play 3 levels each containing 10 pictures.", key="-LEVEL-")
     ],
     [
-        sg.Text("this is some sort of verrrrry loooooooooong description", key="-DESCRIPTION-")
-    ],
-    [
-        sg.Button("Press here to show first picture", key="-NEXT-")
+        sg.Text("\n[Here you will see a 4x4 grid picture displaying objects of different shape and color.]\n", key="-DESCRIPTION-")
     ],
     [
         sg.Image(key="-IMAGE-")  # try to read in jpg.files
@@ -44,12 +41,27 @@ game_screen = [
     [
         sg.Text("Describe the picture:", key="-INSTRUCTION-"), # store what is being typed, when person hits enter
         sg.In(size=(25, 1), enable_events=True, key="-INPUT-", disabled=True),
-        sg.Button("Enter", key="-ENTER-", visible=False)
+        sg.Button("Enter", key="-ENTER-", disabled=True)
+    ],
+    [
+        sg.Text("This is where you enter your sentence. Press the enter button once you are done.\n", key="-INPINSTR-")
     ],
     [
         sg.Text("Did you refer to this?"),
-        sg.Button("YES", key="-YES-"),
-        sg.Button("NO", key="-NO-")
+        sg.Button("YES", key="-YES-", disabled=True),
+        sg.Button("NO", key="-NO-", disabled=True)
+    ],
+    [
+        sg.Text(
+            "This will show up after you have entered your sentence.\nThe program will make a guess about what part of the picture your description was referring to by marking it with a black frame.\nPlease only click YES when ALL of the corresponding positions are marked.\n",
+            key="-FEEDBACKINSTR-"
+        )
+    ],
+    [
+        sg.Text("Whenever you're ready:", key="-NEXTINSTR-")
+    ],
+    [
+        sg.Button("Press here to show first picture", key="-NEXT-")
     ]
 ]
 
@@ -70,7 +82,7 @@ start = sg.Window("Hello!", layout_starting_screen)
 actualgame = sg.Window("SHAPELURN", layout_game_screen, return_keyboard_events=True)
 window = start
 
-level = 3
+level = 1
 i_picture = 0
 
 level1 = "only describe one block, e.g.: 'There is a red circle'"
@@ -86,7 +98,7 @@ def picture_path(level, i_picture, session_name, guess=False):
     path_pict = "./" + session_name + "/" + file_name
     return path_pict
 
-inpt = ""
+#inpt = ""
 
 while True:
     event, values = window.read()
@@ -113,33 +125,39 @@ while True:
     if event == "-NEXT-":
         guessed_blocks.clear()
         # hiding and unhiding
-        window["-NEXT-"].hide_row()
-        window["-YES-"].hide_row()
-        window["-INPUT-"].update(disabled=False)
-        window["-ENTER-"].update(visible=True)
-
         n = 1
-        window["-DESCRIPTION-"].update(level1)
         i_picture += 1
+        window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
+        window["-DESCRIPTION-"].update(level1)
+        window["-INPUT-"].update(disabled=False)
+        window["-INPINSTR-"].hide_row()
+        window["-FEEDBACKINSTR-"].hide_row()
+        window["-YES-"].update(disabled=False)
+        window["-NO-"].update(disabled=False)
+        window["-YES-"].hide_row()
+        #window["-ENTER-"].update(visible=True)
+        window["-NEXTINSTR-"].hide_row()
+        window["-NEXT-"].hide_row()
+
         current_pic = setPicParameters(level, i_picture, session_name)
         current_pic.draw()
         # Katharina added following line
         create_all_blocks(current_pic)
         window["-IMAGE-"].update(filename=picture_path(level, i_picture, session_name))
         eval_picture = str(picture_path(level, i_picture, session_name))
-        window["-INSTRUCTION-"].update("Describe the picture:")
-        window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
+        #window["-INSTRUCTION-"].update("Describe the picture:")
         eval_attempts = 0
 
     if event == "-INPUT-":
+        window["-ENTER-"].update(disabled=False)
         inpt = values["-INPUT-"]
 
     if event == "-ENTER-":
         # hiding and unhiding
-        #window["-ENTER-"].hide_row()
         window["-INPUT-"].update(disabled=True)
         window["-ENTER-"].update(visible=False)
         window["-YES-"].unhide_row()
+
         inpt = sim_stemm(inpt.lower(),list(crude_lexicon))
         print(inpt)
         eval_input = inpt
