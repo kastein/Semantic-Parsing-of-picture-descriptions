@@ -183,10 +183,9 @@ class Picture:
 
     def readable_grid(self):
         """
-        returns a list representation of the grid consisting of n sublists,
-        each corresponding to a row in the grid and an entry for each cell of
-        the grid: the shape and the colour of the block in this cell or None if
-        there is no block in this cell
+        creates a list representation of the grid 
+        :return: list consisting of n sublists, each corresponding to a row in the grid and an entry for each cell of
+        the grid: the shape and the colour of the block in this cell or None if there is no block in this cell
         """
         new_grid = list()
         for row in self.grid:
@@ -197,13 +196,14 @@ class Picture:
                 else:
                     new_row.append(None)
             new_grid.append(new_row)
+            
         return new_grid
 
 
     def mark(self, spacetobemarked):
         """
         draws a rectangle around each block that should be marked in the picture and saves the resulting new picture
-        spacetobemarked: list of tuples each corresponding to the positions of the block(s) that should be marked,
+        :param spacetobemarked: list of tuples each corresponding to the positions of the block(s) that should be marked,
         e.g. [(1,1)] if only the block in the upper left corner should be marked
         """
         with Image.open(self.name+".png") as pic:

@@ -9,10 +9,10 @@ def setPicParameters(level, i_picture, session_name):
     """
     creates a Picture object where the number of shown blocks is based on the current level
     returns the picture object after storing it in the subfolder session_name and giving it a unique file name
-    level: numer (int) of the current level
-    i_picture: number (int) of the current picture in the current level
-    session_name: name of the current session
-    returns: the Picture Object
+    :param level: numer (int) of the current level
+    :param i_picture: number (int) of the current picture in the current level
+    :param session_name: name of the current session
+    :return: the Picture Object
     """
 
     file_name = session_name + "_L" + str(level) + "_" + str(i_picture)
