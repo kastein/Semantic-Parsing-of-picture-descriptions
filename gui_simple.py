@@ -67,7 +67,7 @@ layout_game_screen = [
 ]
 
 start = sg.Window("Hello!", layout_starting_screen)
-actualgame = sg.Window("Language Game", layout_game_screen, return_keyboard_events=True)
+actualgame = sg.Window("SHAPELURN", layout_game_screen, return_keyboard_events=True)
 window = start
 
 level = 3
