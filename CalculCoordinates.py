@@ -1,12 +1,8 @@
-# there is probably a more elegant / smart way of calculating these using lists and indeces
-# but I was afraid to get lost with so many indeces and different coordinates so this solution is not that
-# nice but it works
-
 def calculate_coordinates(size_pic, size_grid, n, rel_blocks):
     """
     calcuates the coordinates of the upper left corner and the lower right corner of equally distributed
-    square blocks in a grid as needed for drawing with tkinter
-    only works for square pictures, grids and blocks
+    blocks in a grid as needed for drawing with tkinter
+    only works for square pictures and grids
     :param picture_size: size of one side of the square picture
     :param grid_size: size of one side of the square grid
     :param n: number of possible blocks per column and per row -> nxn grid

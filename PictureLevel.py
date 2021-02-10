@@ -1,9 +1,8 @@
 from BlockPictureGenerator import *
 
 """
-Number of levels and the corresponding complexity is chosen randomly so far
-You have to make a subdirectory called "pictures" in order to get this work (later the subdirectory should
-be created when starting the language learning game)
+Allows to create a picture object as specified in BlockPictureGenerator with parameters based on the
+current level and the current session
 """
 
 def setPicParameters(level, i_picture, session_name):
@@ -29,33 +28,20 @@ def setPicParameters(level, i_picture, session_name):
         complexity = (3, 9)
 
     elif level == 4:
-        complexity = (5, 15)
+        complexity = (5, 13)
 
-    # full picture at the end
     else:
-        complexity = (16,17)
+        complexity = (3,13)
 
     current_picture = Picture(complexity, path_pict)
+    
     return current_picture
 
+
+
 if __name__=="__main__":
+    # for demonstrattion (only works if there exits a folder with name pictures in the source directory)
     test_picture = setPicParameters(1, 1, "pictures")
     test_picture.draw()
 
-    test_picture = setPicParameters(1, 2, "pictures")
-    test_picture.draw()
 
-    test_picture = setPicParameters(1, 3, "pictures")
-    test_picture.draw()
-
-    test_picture = setPicParameters(1, 4, "pictures")
-    test_picture.draw()
-
-    test_picture = setPicParameters(1, 5, "pictures")
-    test_picture.draw()
-
-    test_picture = setPicParameters(1, 6, "pictures")
-    test_picture.draw()
-
-    test_picture = setPicParameters(1, 7, "pictures")
-    test_picture.draw()
