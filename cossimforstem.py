@@ -9,7 +9,7 @@ def cos(vec1, vec2):
 
 # Computes two vectors from the two words and return their cosine similarity. The vectors are computed as follows: If the two word has the same letter at
 # one position, both vectors get a one at this position. Otherwise vector1 get 1 at this position and vector2 -1. If one word is shorter than the other, the
-# corresponding vector is filled with -1 so both vectors have the same dimension.
+# every empty position counts as if there were a different letter in this position.
 def word_sim(word1,word2):
     vector1,vector2=[],[]
     if len(word1)!=len(word2):
