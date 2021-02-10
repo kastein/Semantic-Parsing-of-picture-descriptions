@@ -16,7 +16,10 @@ total_scores = defaultdict(lambda:defaultdict(int))
 
 starting_screen = [
     [
-        sg.Text("Hello! -Description- Press 'Start Game' to start the game.")
+        sg.Text("Hello! -Description-\nthis is a test")
+    ],
+    [
+       sg.Text("Press 'Start Game' to start the game.")
     ],
     [
         sg.Text("Please enter session name:"),
@@ -28,6 +31,9 @@ starting_screen = [
 game_screen = [
     [
         sg.Text("Level xx, Picture xx:", key="-LEVEL-")
+    ],
+    [
+        sg.Text("only describe one block, e.g.: 'There is a red circle'", key="-DESCRIPTION-")
     ],
     [
         sg.Button("Press here to show first picture", key="-NEXT-")
@@ -212,6 +218,7 @@ while True:
         if i_picture >= 10:
             i_picture = 0
             level += 1
+            window["-DESCRIPTION-"].update("something else")
         i_picture += 1
         current_pic = setPicParameters(level, i_picture, session_name)
         current_pic.draw()
