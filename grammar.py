@@ -34,10 +34,10 @@ __version__ = "2.0"
 __maintainer__ = "Christopher Potts"
 __email__ = "See the authors' websites"
 
-
 import sys
 from collections import defaultdict
 from itertools import product
+from eval_helper import *
 
 # variable to store all blocks of the current picture
 allblocks = []
@@ -45,8 +45,6 @@ allblocks = []
 guessed_blocks = set()
 # only needed when running this script separately for demo or testing purpose
 all_blocks_grid = []
-
-
 
 def create_all_blocks(picture):
     """
@@ -62,137 +60,26 @@ def create_all_blocks(picture):
                 allblocks.append(b)            
     return None
 
-
-def position_test(blocks, block_locations, number, position):
-    """
-    finds all pairs of blocks b1 form blocks and b2 from block_locations that stand in relation position to eachother
-    e.g. blocks is a list of all blue rectangles and block_locations a list of all red circles and position is 'u'
-    then the function returns all blocks that are blue rectangles and are below red circles
-    additionally updates guessed blocks by removing all blocks from guessed_blocks that do not match, e.g. removes all
-    blue rectangles that are not below a red circle and removes all red circles that are not above a blue rectangle
-    :param blocks: list of blocks
-    :param block_locations: list of blocks
-    :param number:
-    :param position: string for the relative position
-    :return: list of all blocks from blocks that stand in relation position to any block in block_locations
-    """
-    fulfill_ref = set()
-    fulfill_guess = set()
-    checked = set()
-    passed_check = set()
-
-    ref_blocks1 = blocks[0]
-    ref_blocks2 = block_locations[0]
-    gue_blocks1 = blocks[1]
-    gue_blocks2 = block_locations[1]
-
-    fulfill_guess.update(gue_blocks1)
-    fulfill_guess.update(gue_blocks2)
-
-    for b1 in ref_blocks1:
-        for b2 in ref_blocks2:
-            checked.add(b1)
-            checked.add(b2)
-            
-            if position == "u":
-                if b1.y > b2.y:
-                    fulfill_ref.add(b1)
-                    passed_check.add(b1)
-                    passed_check.add(b2)
-
-            elif position == "o":
-                if b1.y < b2.y:
-                    fulfill_ref.add(b1)
-                    passed_check.add(b1)
-                    passed_check.add(b2)
- 
-            elif position == "n":
-                if b1.y == b2.y and (b1.x == b2.x+1 or b1.x == b2.x-1):
-                    fulfill_ref.add(b1)
-                    passed_check.add(b1)
-                    passed_check.add(b2)
-
-            elif position == "l":
-                if b1.x < b2.x:
-                    fulfill_ref.add(b1)
-                    passed_check.add(b1)
-                    passed_check.add(b2)
- 
-            elif position == "r":
-                if b1.x > b2.x:
-                    fulfill_ref.add(b1)
-                    passed_check.add(b1)
-                    passed_check.add(b2)
-
-    for bl in checked:
-        if bl not in passed_check:
-            try:
-                fulfill_guess.remove(bl)
-            except:
-                print(bl)
-                print("guessed:")
-                for t in fulfill_guess:
-                    print(t)
-                fulfill_guess.remove(bl)
-
-    check_number = 0
-    for bl in gue_blocks2:
-        if bl in fulfill_guess:
-            check_number += 1
-
-    fulfill_ref = list(fulfill_ref)
-
-    if check_number not in number:
-        fulfill_ref = []
-        fulfill_guess = set()
-
-    return fulfill_ref, fulfill_guess
-    
-
-def block_filter(conditions,blocks):
-    """
-    returns a list of all blocks that match the specific conditions and updates guessed_blocks by adding those blocks
-    :param conditions: list of conditions, e.g. shape == rectangle or color == green
-    :param blocks:
-    :return: a list of all blocks in blocks that fulfill the conditions
-    """
-    fulfill_ref = []
-
-    ref_blocks = blocks[0]
-    gue_blocks = blocks[1]
-    fulfill_guess = gue_blocks.copy()
-
-    for b in ref_blocks:
-        test = True
-        for c in conditions:
-            if not c(b):
-                test = False
-        if test:
-            fulfill_ref.append(b)
-        else:
-            fulfill_guess.remove(b)
-
-    return fulfill_ref, fulfill_guess
-
-
 def update_guess(blocks):
     """
-    :param blocks:
-    :return:
+    updates the guessed_blocks variable by adding the given blocks to it
+    :param blocks: list of Block objects
+    :return: True
     """
     guessed_blocks.update(set(blocks[1]))
     return True
 
+
 def create_lex_rules():
     """
-
+    creates the crude lexical rules for starting from scratch
+    :return: list with all rules from the gold lexicon but without the specific words
     """
     crude_rules = set()
     for key, value in gold_lexicon.items():
         crude_rules.add(value[0])
         
     return list(crude_rules)
-
 
 
 class Grammar:
@@ -204,70 +91,67 @@ class Grammar:
         self.functions = functions
         self.backpointers = defaultdict(list)
 
-    def recursive_treebuild(self,current):
-        #print("current",current)
+    def recursive_treebuild(self, current):
+        # print("current",current)
         current_label = current[0]
         current_start = current[1]
         current_end = current[2]
         sub_trees = []
         if current_end - current_start == 1:
             leaf = self.backpointers[current]
-            tree = [current_label,leaf]
+            tree = [current_label, leaf]
             sub_trees.append(tree)
         else:
             possible_children = self.backpointers[current]
             for pointer in possible_children:
-                #print(pointer,len(pointer))
+                # print(pointer,len(pointer))
                 child1 = pointer[0]
                 child2 = pointer[1]
-                k = pointer[2] # split in Katharinas Code
-                left_subtrees = self.recursive_treebuild((child1,current_start,k))
-                right_subtrees = self.recursive_treebuild((child2,k,current_end))
-                
+                k = pointer[2]  # split in Katharinas Code
+                left_subtrees = self.recursive_treebuild((child1, current_start, k))
+                right_subtrees = self.recursive_treebuild((child2, k, current_end))
+
                 for left in left_subtrees:
                     for right in right_subtrees:
-                        tree = [current_label,[left,right]]
+                        tree = [current_label, [left, right]]
                         sub_trees.append(tree)
 
         return sub_trees
-                
 
-    def compute_parse_trees(self,n):
-        #start_point = ('V',0,n)
+    def compute_parse_trees(self, n):
+        # start_point = ('V',0,n)
         parse_trees = []
-        #for i in backpointers:
-            #print("key",i,backpointers[i])
-        for l,x,y in self.backpointers:
-            if l[0]=="V" and x == 0 and y==n:
-                parse_trees += self.recursive_treebuild((l,x,y))
+        # for i in backpointers:
+        # print("key",i,backpointers[i])
+        for l, x, y in self.backpointers:
+            if l[0] == "V" and x == 0 and y == n:
+                parse_trees += self.recursive_treebuild((l, x, y))
         return parse_trees
-        
 
     def gen(self, s):
         """CYK parsing, but we just keep the full derivations. The input
         s should be a string that can be parsed with this grammar."""
         words = s.split()
-        n = len(words)+1
+        n = len(words) + 1
         trace = defaultdict(set)
         self.backpointers = defaultdict(list)
-        
-        for i in range(1,n):
-            word = words[i-1]
-            for syntax,semantic in self.lexicon[word]:
-                trace[(i-1,i)].add((syntax,semantic))
-                self.backpointers[((syntax,semantic),i-1,i)].append(word)
+
+        for i in range(1, n):
+            word = words[i - 1]
+            for syntax, semantic in self.lexicon[word]:
+                trace[(i - 1, i)].add((syntax, semantic))
+                self.backpointers[((syntax, semantic), i - 1, i)].append(word)
         for j in range(2, n):
-            for i in range(j-1, -1, -1):
-                for k in range(i+1, j):
-                    for c1, c2 in product(trace[(i,k)], trace[(k,j)]):
-                        for lfnode in self.allcombos(c1,c2):
-                            trace[(i,j)].add(lfnode)
-                            #print(c1,c2)
-                            self.backpointers[(lfnode,i,j)].append((c1,c2,k))
+            for i in range(j - 1, -1, -1):
+                for k in range(i + 1, j):
+                    for c1, c2 in product(trace[(i, k)], trace[(k, j)]):
+                        for lfnode in self.allcombos(c1, c2):
+                            trace[(i, j)].add(lfnode)
+                            # print(c1,c2)
+                            self.backpointers[(lfnode, i, j)].append((c1, c2, k))
         # Return only full parses, from the upper right of the chart:
-        #return buildtrees(trace[(0,n-1)])
-        return self.compute_parse_trees(n-1)
-    
+        # return buildtrees(trace[(0,n-1)])
+        return self.compute_parse_trees(n - 1)
 
     def allcombos(self, c1, c2):
         """Given any two nonterminal node labels, find all the ways
@@ -288,7 +172,7 @@ class Grammar:
         grammar = sys.modules[__name__]
         for key, val in list(self.functions.items()):
             setattr(grammar, key, val)
-        return eval(lf[0][1]) # Interpret just the root node's semantics. 
+        return eval(lf[0][1])  # Interpret just the root node's semantics.
 
 
 # The lexicon for our pictures
