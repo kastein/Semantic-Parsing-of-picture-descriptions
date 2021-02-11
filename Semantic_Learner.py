@@ -1,3 +1,7 @@
+# The following code was written by Christopher Potts and Percy Liang. Their original file
+# is called synthesis.py. We deleted evaluate_interpretive and evaluate_latent_semparse and
+# adjusted evaluate_semparse and leaves  as written in the comments in these functions.
+
 #!/usr/bin/env python
 
 """
@@ -79,15 +83,15 @@ def leaves(x):
     trees. Used by phi_sem"""
     # Leaf-only trees:
     if len(x[1])==1 and isinstance(x[1][0],str):
-        return [(x[0],x[1][0])]
+        return [(x[0],x[1][0])] # Adjusted so it fit our backpointer implementation we build in the CYK-parser
     # Recursive call for all child subtrees:
     l = []
-    for child in x[1]:
+    for child in x[1]: # Adjusted so it fit to our backpointer implementation we build in the CYK-parser
         l += leaves(child)
     return l
 
 
-def evaluate_semparse(u,lf,grammar):
+def evaluate_semparse(u,lf,grammar): # We give evaluate_semparse an utterance, an lf and a grammar as arguments so wen can use it for our interactive game
     """Evaluate the semantic parsing set-up, where we learn from and 
     predict logical forms. The set-up is identical to the simple 
     example in evenodd.py, except that classes is gram.gen, which 
@@ -95,18 +99,18 @@ def evaluate_semparse(u,lf,grammar):
     print("======================================================================")
     print("SEMANTIC PARSING")
     # Only (input, lf) pairs for this task:
-    sem_utterance=[[u, lf, grammar.sem(lf)]]
+    sem_utterance=[[u, lf, grammar.sem(lf)]] # This replaces semdata
     semparse_train = [[x,y] for x, y, d in sem_utterance]
     semparse_test = [[x,y] for x, y, d in sem_utterance]        
-    weights = evaluate(phi=phi_sem,
+    weights = evaluate(phi=phi_sem,      # We let evaluate return the weights and store them
                        optimizer=SGD,
                        train=semparse_train,
                        test=semparse_test,
                        classes=grammar.gen,
-                       true_or_false=grammar.sem,
+                       true_or_false=grammar.sem,# We want only lf with denotation True. To test that we give this additional argument to evaluate
                        T=10,
                        eta=0.1)
-    return weights
+    return weights # We return the weights so that we can use it for removing unlikely rules from the lexicon
     
 
 
