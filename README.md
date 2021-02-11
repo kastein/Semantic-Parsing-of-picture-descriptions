@@ -40,6 +40,8 @@ For the detailed instructions and examples please refer to the [Wiki](https://gi
 * CalculCoordinates.py: used to calculate the coordinates for the picture generation in BlockPictureGenerator.py **documented**
 * cosimforstem.py: cosine similarity based heuristic for stemming words from an unknown language **documented**
 * PictureLevel.py: generates a picture for a specified level by calling BlockPictureGenerator.py with corresponding parameters **documented**
+* Semantic_Learner.py
+* eval_helper.py: functions needed in grammar.py to evaluate truth of description
 * grammar.py:
 * gui_simple: working GUI
 * learning.py: the Stochastic Gradient Descent learn algorithm
