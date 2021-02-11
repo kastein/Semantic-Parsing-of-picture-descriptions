@@ -61,82 +61,137 @@ def create_all_blocks(picture):
             if b:
                 allblocks.append(b)            
     return None
-    
 
-def position_test(blocks,block_locations,position):
+
+def position_test(blocks, block_locations, number, position):
     """
-    finds all pairs of blocks b1 form blocks and b2 from blocklocations that stand in relation position to eachother
+    finds all pairs of blocks b1 form blocks and b2 from block_locations that stand in relation position to eachother
     e.g. blocks is a list of all blue rectangles and block_locations a list of all red circles and position is 'u'
     then the function returns all blocks that are blue rectangles and are below red circles
     additionally updates guessed blocks by removing all blocks from guessed_blocks that do not match, e.g. removes all
     blue rectangles that are not below a red circle and removes all red circles that are not above a blue rectangle
     :param blocks: list of blocks
     :param block_locations: list of blocks
+    :param number:
     :param position: string for the relative position
     :return: list of all blocks from blocks that stand in relation position to any block in block_locations
     """
-    fulfill = []
+    fulfill_ref = set()
+    fulfill_guess = set()
     checked = set()
     passed_check = set()
 
-    for b1 in blocks:
-        for b2 in block_locations:
+    ref_blocks1 = blocks[0]
+    ref_blocks2 = block_locations[0]
+    gue_blocks1 = blocks[1]
+    gue_blocks2 = block_locations[1]
+
+    fulfill_guess.update(gue_blocks1)
+    fulfill_guess.update(gue_blocks2)
+
+    for b1 in ref_blocks1:
+        for b2 in ref_blocks2:
             checked.add(b1)
             checked.add(b2)
             
             if position == "u":
                 if b1.y > b2.y:
-                    fulfill.append(b1)
+                    fulfill_ref.add(b1)
                     passed_check.add(b1)
                     passed_check.add(b2)
 
             elif position == "o":
                 if b1.y < b2.y:
-                    fulfill.append(b1)
+                    fulfill_ref.add(b1)
                     passed_check.add(b1)
                     passed_check.add(b2)
  
             elif position == "n":
                 if b1.y == b2.y and (b1.x == b2.x+1 or b1.x == b2.x-1):
-                    fulfill.append(b1)
+                    fulfill_ref.add(b1)
                     passed_check.add(b1)
                     passed_check.add(b2)
 
             elif position == "l":
                 if b1.x < b2.x:
-                    fulfill.append(b1)
+                    fulfill_ref.add(b1)
                     passed_check.add(b1)
                     passed_check.add(b2)
  
             elif position == "r":
                 if b1.x > b2.x:
-                    fulfill.append(b1)
+                    fulfill_ref.add(b1)
                     passed_check.add(b1)
                     passed_check.add(b2)
 
     for bl in checked:
         if bl not in passed_check:
-            guessed_blocks.remove(bl)
-        
-    return fulfill
+            try:
+                fulfill_guess.remove(bl)
+            except:
+                print(bl)
+                print("guessed:")
+                for t in fulfill_guess:
+                    print(t)
+                fulfill_guess.remove(bl)
+
+    check_number = 0
+    for bl in gue_blocks2:
+        if bl in fulfill_guess:
+            check_number += 1
+
+    fulfill_ref = list(fulfill_ref)
+
+    if check_number not in number:
+        fulfill_ref = []
+        fulfill_guess = set()
+
+    return fulfill_ref, fulfill_guess
     
 
 def block_filter(conditions,blocks):
     """
     returns a list of all blocks that match the specific conditions and updates guessed_blocks by adding those blocks
     :param conditions: list of conditions, e.g. shape == rectangle or color == green
+    :param blocks:
     :return: a list of all blocks in blocks that fulfill the conditions
     """
-    fulfill = []
-    for b in blocks:
+    fulfill_ref = []
+
+    ref_blocks = blocks[0]
+    gue_blocks = blocks[1]
+    fulfill_guess = gue_blocks.copy()
+
+    for b in ref_blocks:
         test = True
         for c in conditions:
-            test = test and c(b)
+            if not c(b):
+                test = False
         if test:
-            fulfill.append(b)
-    guessed_blocks.update(fulfill)
-    return fulfill
+            fulfill_ref.append(b)
+        else:
+            fulfill_guess.remove(b)
 
+    return fulfill_ref, fulfill_guess
+
+
+def update_guess(blocks):
+    """
+    :param blocks:
+    :return:
+    """
+    guessed_blocks.update(set(blocks[1]))
+    return True
+
+def create_lex_rules():
+    """
+
+    """
+    crude_rules = set()
+    for key, value in gold_lexicon.items():
+        crude_rules.add(value[0])
+        
+    return list(crude_rules)
 
 
 
@@ -238,89 +293,78 @@ class Grammar:
 
 # The lexicon for our pictures
 gold_lexicon = {
-    'form':[('B','[]')],
-    'forms':[('B','[]')],
-    'square': [('B','[(lambda b: b.shape == "rectangle")]')],
-    'squares': [('B','[(lambda b: b.shape == "rectangle")]')],
-    'triangle': [('B','[(lambda b: b.shape == "triangle")]')],
-    'triangles': [('B','[(lambda b: b.shape == "triangle")]')],
-    'circle': [('B','[(lambda b: b.shape == "circle")]')],
-    'circles': [('B','[(lambda b: b.shape == "circle")]')],
-    'green':[('C','green')],
-    'yellow':[('C','yellow')],
-    'blue':[('C','blue')],
-    'red':[('C','red')],
-    'there':[('E','exist')],
-    'is':[('I','identy')],
-    'are':[('I','identy')],
+    'form':[('B', 'block_filter([], (allblocks, allblocks))')],
+    'forms':[('B', 'block_filter([], (allblocks, allblocks))')],
+    'square': [('B', 'block_filter([lambda b: b.shape=="rectangle"],(allblocks, allblocks))')],
+    'squares': [('B', 'block_filter([lambda b: b.shape=="rectangle"],(allblocks, allblocks))')],
+    'triangle': [('B', 'block_filter([(lambda b: b.shape == "triangle")], (allblocks, allblocks))')],
+    'triangles': [('B', 'block_filter([(lambda b: b.shape == "triangle")], (allblocks, allblocks))')],
+    'circle': [('B', 'block_filter([(lambda b: b.shape == "circle")], (allblocks ,allblocks))')],
+    'circles': [('B', 'block_filter([(lambda b: b.shape == "circle")], (allblocks, allblocks))')],
+    'green': [('C', 'green')],
+    'yellow': [('C', 'yellow')],
+    'blue': [('C', 'blue')],
+    'red': [('C', 'red')],
+    'there': [('E', 'exist')],
+    'is': [('I', 'identy')],
+    'are': [('I', 'identy')],
     'a':[('N','range(1,17)')],
     'one':[('N','[1]')],
     'two':[('N','[2]')],
     'three':[('N','[3]')],
-    'under':[('U','under')],
-    'over':[('U','over')],
-    'and':[('AND','und')],
-    'next':[('NEXT', 'next')],
-    'to':[('TO', 'to')],
-    'of':[('TO', 'to')],
-    'left':[('LR', 'left')],
-    'right':[('LR', 'right')],
-    'the':[('THE', 'the')]
+    'under': [('U', 'under')],
+    'over': [('U', 'over')],
+    'and': [('AND', 'und')],
+    'next': [('NEXT', 'next')],
+    'to': [('TO', 'to')],
+    'of': [('TO', 'to')],
+    'left': [('LR', 'left')],
+    'right': [('LR', 'right')],
+    'the': [('THE', 'the')]
 
 }
 
-# The binarized rule set for our pictures
-# The second rule corresponds to:
-# EN -> E N  semantics: apply E(N)
+# The binarized rule set for our pictures, start symbol is V
+# The first rule corresponds to:
+# V -> EX  BN  semantics: apply EX(BN)
 rules = [
-    ['C', 'B', 'B', (0,1)],
-    ['E','N','EN',(0,1)],
-    ['E','I','E',(1,0)],
-    ['EN','B','V',(0,1)],
-    ['EN','BS','V',(0,1)],
-    ['U','N','POS',(0,1)],
-    ['PP','N','POS',(0,1)],
-    ['POS','B','L',(0,1)],
-    ['POS','BS','L',(0,1)],
-    ['B','L','BS',(1,0)],
-    ['V','AND','VAND',(1,0)],
-    ['VAND','V','V',(0,1)],
-    ['NEXT','TO','PP',(1,0)],
-    ['TS','SIDE','PP',(0,1)],
-    ['TO','THE','TS',(0,1)],
-    ['LR','TO','SIDE',(1,0)]
+    ['EN', 'B', 'V', (0, 1)],
+    ['EN', 'BS', 'V', (0, 1)],
+    ['VAND', 'V', 'V', (0, 1)],
+    ['E', 'N', 'EN', (0, 1)],
+    ['E', 'I', 'E', (1,0)],
+    ['C', 'B', 'B', (0, 1)],
+    ['B', 'L', 'BS', (1, 0)],
+    ['POS', 'B', 'L', (0, 1)],
+    ['POS', 'BS', 'L', (0, 1)],
+    ['U', 'N', 'POS', (0, 1)],
+    ['PP', 'N', 'POS', (0, 1)],
+    ['NEXT', 'TO', 'PP', (1, 0)],
+    ['TS', 'SIDE', 'PP', (0, 1)],
+    ['TO', 'THE', 'TS', (0, 1)],
+    ['LR', 'TO', 'SIDE', (1, 0)],
+    ['V', 'AND', 'VAND', (1, 0)]
 ]
 
 # These are needed to interpret our logical forms with eval. They are
 # imported into the namespace Grammar.sem to achieve that.
 functions = {
-    'block': (lambda conditions: (lambda number_requirement: (number_requirement,conditions))),
     'identy': (lambda x: x),
-    'exist': (lambda n : (lambda b: len(block_filter(b, allblocks)) in n)),
-    'und':(lambda v1:(lambda v2: v1 and v2)),
-    'blue': (lambda x: x+[(lambda b:b.colour=="blue")]),
-    'red': (lambda x: x+[(lambda b:b.colour=="red")]),
-    'green': (lambda x: x+[(lambda b:b.colour=="green")]),
-    'yellow':(lambda x: x+[(lambda b:b.colour=="yellow")]),
-    'under':(lambda n: (lambda x:(lambda y: [(lambda b: len(position_test(block_filter(y, allblocks), block_filter(x,allblocks),
-                                                                          "u")) in n and b in position_test(
-        block_filter(
-            y, allblocks), block_filter(x, allblocks), "u"))]))),
-    'over':(lambda n: (lambda x:(lambda y: [(lambda b: len(position_test(block_filter(y, allblocks), block_filter(x,allblocks),
-                                                                         "o")) in n and b in position_test(block_filter(
-        y, allblocks), block_filter(x, allblocks), "o"))]))),
-    'next':(lambda n: (lambda x:(lambda y: [(lambda b: len(position_test(block_filter(y, allblocks), block_filter(x, allblocks),
-                                                                         "n")) in n and b in position_test(block_filter(
-        y, allblocks), block_filter(x, allblocks), "n"))]))),
-    'left':(lambda n: (lambda x:(lambda y: [(lambda b: len(position_test(block_filter(y, allblocks), block_filter(x,allblocks),
-                                                                         "l")) in n and b in position_test(block_filter(
-        y, allblocks), block_filter(x, allblocks), "l"))]))),
-    'right':(lambda n: (lambda x:(lambda y: [(lambda b: len(position_test(block_filter(y, allblocks), block_filter(x,allblocks),
-                                                                          "r")) in n and b in position_test(
-        block_filter(
-            y, allblocks), block_filter(x, allblocks), "r"))]))),
-    'to':(lambda x: x),
-    'the':(lambda x: x)
+    'exist': (lambda n: (lambda b: len(b[0]) != 0 and len(b[0]) in n and update_guess(b))),
+    'und': (lambda v1: (lambda v2: v1 and v2)),
+
+    'blue': (lambda x: block_filter([(lambda b:b.colour == "blue")], x)),
+    'red': (lambda x: block_filter([(lambda b:b.colour == "red")], x)),
+    'green': (lambda x: block_filter([(lambda b:b.colour == "green")], x)),
+    'yellow':(lambda x: block_filter([(lambda b:b.colour == "yellow")], x)),
+
+    'under': (lambda n: (lambda x: (lambda y: position_test(y, x, n, "u")))),
+    'over': (lambda n: (lambda x: (lambda y: position_test(y, x, n, "o")))),
+    'next': (lambda n: (lambda x: (lambda y: position_test(y, x, n, "n")))),
+    'left': (lambda n: (lambda x: (lambda y:position_test(y, x, n, "l")))),
+    'right': (lambda n: (lambda x: (lambda y: position_test(y, x, n, "r")))),
+    'to': (lambda x: x),
+    'the': (lambda x: x)
     
 }
 
@@ -357,10 +401,11 @@ if __name__ == '__main__':
         print('Utterance: {}'.format(u))
         for lf in lfs:
             print("\tLF: {}".format(lf))
-            print('\tDenotation: {}'.format(gram.sem(lf)))
+            seman = gram.sem(lf)
+            print('\tDenotation: {}'.format(seman))
 
             # if utterance doesn't describe sentence not blocks should be guessed at all
-            if gram.sem(lf) == False:
+            if seman == False:
                 guessed_blocks = set()
 
             # visualization of how the computer gives feedback about what it "understood"
