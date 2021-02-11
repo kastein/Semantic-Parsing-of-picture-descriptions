@@ -79,14 +79,18 @@ test_utterances = [
 
 # Are all working
 test_utterances = [
+    'there is a square',
     'there are three blue circles',
     'there are two red triangles',
     'there is a green square',
     'there is a yellow triangle',
+    'there is a yellow form',
+    'there is a yellow triangle and there is a green square',
+    'there is a yellow triangle and there is a yellow circle',
+    'there is a yellow triangle and there is a red triangle',
     'there is a green circle over a green circle',
     'there is a green triangle under a red circle',
     'there is a green circle to the right of a red circle',
-    'there are two green circles under a blue circle',
     'there is a green form next to a green form',
     'there is a blue circle under a blue circle',
     'there is a yellow circle over a blue circle',
@@ -94,7 +98,10 @@ test_utterances = [
     'there is a yellow triangle under a red triangle',
     'there is a red triangle under a yellow triangle',
     'there is a yellow triangle over a red triangle',
-    'there is a blue triangle under a red triangle under a yellow triangle'
+    'there is a blue triangle under a red triangle under a yellow triangle',
+    'there are two green circles under three blue circles',
+    'there are two green circles under two blue circles',
+    'there are two green circles under a blue circle'
 ]
 
 
