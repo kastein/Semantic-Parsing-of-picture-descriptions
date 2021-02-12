@@ -46,8 +46,8 @@ Our parsing and learning framework is based on Liang, Percy and Christopher Pott
 * cosimforstem.py: cosine similarity based heuristic for stemming words from an unknown language **documented**
 * PictureLevel.py: generates a picture for a specified level by calling BlockPictureGenerator.py with corresponding parameters **documented**
 * Semantic_Learner.py **documented**
-* eval_helper.py: functions needed in grammar.py to evaluate truth of description
-* grammar.py:
+* eval_helper.py: functions needed in grammar.py to evaluate truth of description **documented**
+* grammar.py: defines the grammar, the evaluation of logical forms and the parser **documented**
 * gui_simple: working GUI **documented**
 * learning.py: the Stochastic Gradient Descent learn algorithm
 * semdata.py: training and test sentences **documented**
