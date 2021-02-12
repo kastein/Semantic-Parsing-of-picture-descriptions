@@ -1,3 +1,4 @@
+# imports
 import PySimpleGUI as sg
 from BlockPictureGenerator import Picture
 from grammar import *
@@ -9,11 +10,13 @@ import math
 from collections import defaultdict
 from cossimforstem import sim_stemm
 
+# inizializing grammar and learning algorithm
 crude_lexicon={}
 crude_rule = [('THE', 'the'),('LR', 'right'),('LR', 'left'),('TO', 'to'),('NEXT', 'next'),('B','[]'),('B','[(lambda b: b.shape == "rectangle")]'),('B','[(lambda b: b.shape == "triangle")]'),('B','[(lambda b: b.shape == "circle")]'),('C','green'),('C','yellow'),('C','blue'),('C','red'),('E','exist'),('I','identy'),('N','[2]'),('N','[3]'),('N','range(1,17)'),('N','[1]'),('U','under'),('U','over'),('AND','und')]
 threshold = -0.5
 total_scores = defaultdict(lambda:defaultdict(int))
 
+# beginning screen contents
 starting_screen = [
     [
         sg.Text("Hello! Welcome to SHAPELURN, where you can teach the computer any language of your choice!\nYou will be looking at different pictures and describing them to the computer in one sentence.\nPlease use rather short sentences and try not to use negation and conjunction.")
@@ -28,6 +31,7 @@ starting_screen = [
     ]
 ]
 
+# game screen contents
 game_screen = [
     [
         sg.Text("Level xx, Picture xx: <- This is the level display, you will play 3 levels each containing 10 pictures.", key="-LEVEL-")
@@ -36,11 +40,11 @@ game_screen = [
         sg.Text("\n[Here you will see a 4x4 grid picture displaying objects of different shape and color.]\n", key="-DESCRIPTION-")
     ],
     [
-        sg.Image(key="-IMAGE-")  # try to read in jpg.files
+        sg.Image(key="-IMAGE-")  # can display any png image
     ],
     [
-        sg.Text("Describe the picture:", key="-INSTRUCTION-"), # store what is being typed, when person hits enter
-        sg.In(size=(25, 1), enable_events=True, key="-INPUT-", disabled=True),
+        sg.Text("Describe the picture:", key="-INSTRUCTION-"),
+        sg.In(size=(25, 1), enable_events=True, key="-INPUT-", disabled=True), # takes keyboard input from user
         sg.Button("Enter", key="-ENTER-", disabled=True)
     ],
     [
@@ -66,7 +70,7 @@ game_screen = [
     ]
 ]
 
-
+# the layouts for both screens
 layout_starting_screen = [
     [
         sg.Column(starting_screen)
@@ -79,19 +83,32 @@ layout_game_screen = [
     ]
 ]
 
+# initializing the windows
 start = sg.Window("Hello!", layout_starting_screen)
 actualgame = sg.Window("SHAPELURN", layout_game_screen, return_keyboard_events=True)
 window = start
 
+# define starting point
 level = 1
-i_picture = 0
+i_picture = 1
+n = 1
+eval_attempts = 0
 
+# level descriptions
 level1 = "only describe one block, e.g.: 'There is a red circle'"
 level2 = "describe one or more blocks, e.g: 'There are two blue forms'"
 level3 = "describe relations between blocks, e.g.: 'There is a red circle under a blue square'"
 
 
 def picture_path(level, i_picture, session_name, guess=False):
+    """
+    returns the path of the current picture given some details about it
+    :param level: the level of the picture (int)
+    :param i_picture: the picture number (int)
+    :param session_name: the session name that has been chosen by the user (str)
+    :param guess: whether the guess is included or not, default False (bool)
+    :return: the path to the picture
+    """
     if not guess:
         file_name = session_name + "_L" + str(level) + "_" + str(i_picture) + ".png"
     else:
@@ -99,35 +116,38 @@ def picture_path(level, i_picture, session_name, guess=False):
     path_pict = "./" + session_name + "/" + file_name
     return path_pict
 
-#inpt = ""
-
+# the game loop
 while True:
+    # event records which buttons were pressed, values store any keyboard input
     event, values = window.read()
     print(event, values)
 
+    # to end the game
     if event == "Exit" or event == sg.WIN_CLOSED:
         break
 
-    # Beginning screen
+    # asks user for a session name under which their data will be stored
+    if event == "-SESSION-":
+        session_name = values["-SESSION-"]
+        window["-START-"].update(disabled=False)
+
+    # initializes a folder named after the session and an evaluation file inside that folder
     if event == "-START-":
         os.mkdir(session_name)
         evaluation_file = "./" + session_name + "/evaluation.csv"
         with open(evaluation_file, "w", encoding="utf-8") as f:
             first_line = "n\tlevel\tpicture\tinput\tmarked_picture\tattempts\ttree\n"
             f.writelines(first_line)
+        # closing the the start window to start the actual game window
         window.close()
         window = actualgame
 
-    if event == "-SESSION-":
-        session_name = values["-SESSION-"]
-        window["-START-"].update(disabled=False)
-
-    # Displaying picture and taking input
+    # After reading the instructions this button starts the game and shows the first picture
     if event == "-NEXT-":
+        # empty the guesses so they don't stack up with those from previous rounds
         guessed_blocks.clear()
-        # hiding and unhiding
-        n = 1
-        i_picture += 1
+
+        # hiding all the description from the beginning and updating text display and button clickability
         window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
         window["-DESCRIPTION-"].update(level1)
         window["-INPUT-"].update(disabled=False)
@@ -137,33 +157,37 @@ while True:
         window["-NO-"].update(disabled=False)
         window["-SKIP-"].update(disabled=False)
         window["-YES-"].hide_row()
-        #window["-ENTER-"].update(visible=True)
         window["-NEXTINSTR-"].hide_row()
         window["-NEXT-"].hide_row()
 
+        # initializing the first picture
         current_pic = setPicParameters(level, i_picture, session_name)
         current_pic.draw()
-        # Katharina added following line
         create_all_blocks(current_pic)
+        # displaying the picture on the screen
         window["-IMAGE-"].update(filename=picture_path(level, i_picture, session_name))
+        # storing the path to write into the evaluation file
         eval_picture = str(picture_path(level, i_picture, session_name))
-        #window["-INSTRUCTION-"].update("Describe the picture:")
-        eval_attempts = 0
 
+    # takes a picture description as input from the user
     if event == "-INPUT-":
         window["-ENTER-"].update(disabled=False)
         inpt = values["-INPUT-"]
 
+    # takes the complete input and processes it with grammar and learning algorithm to find the shapes the user referred to
     if event == "-ENTER-":
-        # hiding and unhiding
+        # disabling further keyboard input and unhiding feedback buttons
         window["-INPUT-"].update(disabled=True)
         window["-ENTER-"].update(visible=False)
         window["-YES-"].unhide_row()
 
+        # stemming in order to find e.g. plural and singular forms and map them to the same lexical entry
         inpt = sim_stemm(inpt.lower(),list(crude_lexicon))
-        print(inpt)
+
+        # for storing in evaluation file
         eval_input = inpt
-   
+
+        # for any new word, map it to all possible rules and set initial weight for each rule to 0
         for word in inpt.split():
             if not word in crude_lexicon:
                 crude_lexicon[word]=crude_rule[:]
@@ -171,14 +195,8 @@ while True:
                     total_scores[word][rule]=0
         gram = Grammar(crude_lexicon,rules,functions)
 
-        # here go into semantic parser
-        #guessed_blocks = []
+        # generate all possible trees given the current rules
         lfs = iter(gram.gen(inpt))
-        #for lf in lfs:
-            #print("\tLF: {}".format(lf))
-            #print('\tDenotation: {}'.format(gram.sem(lf)))
-        #print(guessed_blocks)
-        # Katharina added following 2 lines
         guessed_blocks.clear()
         try:
             lf = next(lfs)
