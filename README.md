@@ -50,6 +50,6 @@ Our parsing and learning framework is based on Liang, Percy and Christopher Pott
 * eval_helper.py: functions needed in grammar.py to evaluate truth of description **documented**
 * grammar.py: defines the grammar, the evaluation of logical forms and the parser **documented**
 * gui_simple: working GUI **documented**
-* learning.py: the Stochastic Gradient Descent learn algorithm
+* learning.py: the Stochastic Gradient Descent learn algorithm **documented** 
 * semdata.py: training and test sentences **documented**
 * word.py and world2.png: example picture used for demo of grammar.py with test sentences from semdata.py
