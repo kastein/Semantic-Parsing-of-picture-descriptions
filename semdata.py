@@ -102,7 +102,8 @@ test_utterances = [
     'there are two green circles under three blue circles',
     'there are two green circles under two blue circles',
     'there are two green circles under a blue circle',
-    'there is a red square or there is a green square'
+    'there is a red square or there is a green square',
+    'there is a red circle or there is a yellow circle'
 ]
 
 test_utterances_new = [
