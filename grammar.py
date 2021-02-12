@@ -187,6 +187,7 @@ gold_lexicon = {
     'under': [('U', 'under')],
     'over': [('U', 'over')],
     'and': [('AND', 'und')],
+    'or': [('AND', 'oder')],
     'next': [('NEXT', 'next')],
     'to': [('TO', 'to')],
     'of': [('TO', 'to')],
@@ -226,6 +227,7 @@ functions = {
     'identy': (lambda x: x),
     'exist': (lambda n: (lambda b: len(b[0]) != 0 and len(b[0]) in n and update_guess(b))),
     'und': (lambda v1: (lambda v2: v1 and v2)),
+    'oder': (lambda v1: (lambda v2: v1 or v2)),
 
     'blue': (lambda x: block_filter([(lambda b:b.colour == "blue")], x)),
     'red': (lambda x: block_filter([(lambda b:b.colour == "red")], x)),
