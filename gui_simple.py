@@ -19,7 +19,7 @@ total_scores = defaultdict(lambda:defaultdict(int))
 # beginning screen contents
 starting_screen = [
     [
-        sg.Text("Hello! Welcome to SHAPELURN, where you can teach the computer any language of your choice!\nYou will be looking at different pictures and describing them to the computer in one sentence.\nPlease use rather short sentences and try not to use negation and conjunction.")
+        sg.Text("Hello! Welcome to SHAPELURN, where you can teach the computer any language of your choice!\nYou will be looking at different pictures and describing them to the computer in one sentence.\nPlease use rather short sentences and try not to use negation and conjunction only on full sentences.")
     ],
     [
        sg.Text("In order to evaluate our model we would like to collect your data.\nPlease enter any name under which you would like to save your data.")
@@ -198,6 +198,8 @@ while True:
         # generate all possible trees given the current rules
         lfs = iter(gram.gen(inpt))
         guessed_blocks.clear()
+
+        # mark first possible guess in the picture
         try:
             lf = next(lfs)
             while gram.sem(lf) == False:
@@ -207,15 +209,16 @@ while True:
             for b in guessed_blocks:
                 guess.append((b.y, b.x))
             guessed_blocks.clear()
-
             # mark the guessed blocks in the picture
             current_pic.mark(guess)
             window["-IMAGE-"].update(filename=picture_path(level, i_picture, session_name, guess=True))
-            #window["-INPUT-"].update("")
+            # for evaluation file
             eval_marked_picture = str(picture_path(level, i_picture, session_name, guess=True))
         except StopIteration:
             pass
 
+    # parser has found the correct tree, learning algorithm updates the weights for lexical items
+    # next picture is displayed
     if event == "-YES-":
         guessed_blocks.clear()
         # hiding and unhiding
@@ -223,8 +226,9 @@ while True:
         window["-ENTER-"].unhide_row()
         window["-INPUT-"].update(disabled=False)
         window["-ENTER-"].update(visible=True)
-
         window["-INPUT-"].update("")
+
+        # updates weights
         weights = evaluate_semparse(inpt,lf,gram)
         print("TEST",[weights[key] for key in weights],[0.0 for word in inpt],len(inpt.split()))
         if [weights[key] for key in weights] == [0.0 for word in inpt.split()]:
@@ -247,12 +251,15 @@ while True:
         gram = Grammar(crude_lexicon,rules,functions)
         for word in crude_lexicon:
             print(word,len(crude_lexicon[word]))
+
+        # writes information about the round into the evaluation file
         eval_response = "yes"
         eval_attempts += 1
         with open(evaluation_file, "a", encoding="utf-8") as f:
             line = str(n) + "\t" + str(level) + "\t" + eval_picture + "\t" + eval_input + "\t" + eval_marked_picture + "\t" + str(eval_attempts) + "\t" + str(lf) + "\n"
             f.writelines(line)
 
+        # update the level display
         n += 1
         if i_picture >= 10:
             i_picture = 0
@@ -264,19 +271,21 @@ while True:
             else:
                 print("thank you for participating!")
         i_picture += 1
+
+        # initialize new picture
         current_pic = setPicParameters(level, i_picture, session_name)
         current_pic.draw()
-        # Katharina added following line
         create_all_blocks(current_pic)
+
+        # display picture
         window["-IMAGE-"].update(filename=picture_path(level, i_picture, session_name))
         eval_picture = str(picture_path(level, i_picture, session_name))
         window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
         eval_attempts = 0
 
+    # parsing tree was not correct, produce new guess
     if event == "-NO-":
-        # hiding and unhiding
-        # yet to come
-        # ask for next guess from parser
+        # produce new guess (as above)
         guessed_blocks.clear()
         try:
             lf = next(lfs)
@@ -290,11 +299,10 @@ while True:
             guessed_blocks.clear()
             current_pic.mark(guess)
             window["-IMAGE-"].update(filename=picture_path(level, i_picture, session_name, guess=True))
-            #?
-            #window["-INPUT-"].update("")
             eval_marked_picture = str(picture_path(level, i_picture, session_name, guess=True))
             eval_attempts += 1
 
+        # if we run out of options, show the next picture
         except StopIteration:
             window["-YES-"].hide_row()
             window["-ENTER-"].unhide_row()
@@ -314,7 +322,7 @@ while True:
             eval_picture = str(picture_path(level, i_picture, session_name))
             window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
 
-
+    # skip if you accidentally entered a wrong input
     if event == "-SKIP-":
         with open(evaluation_file, "a", encoding="utf-8") as f:
             line = str(level) + "\t" + eval_picture + "\t" + eval_input + "\t" + eval_marked_picture + "\t" + "SKIPPED" + "\t" + str(lf) + "\n"
