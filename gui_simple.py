@@ -12,7 +12,7 @@ from cossimforstem import sim_stemm
 
 # inizializing grammar and learning algorithm
 crude_lexicon={}
-crude_rule = [('THE', 'the'),('LR', 'right'),('LR', 'left'),('TO', 'to'),('NEXT', 'next'),('B','[]'),('B','[(lambda b: b.shape == "rectangle")]'),('B','[(lambda b: b.shape == "triangle")]'),('B','[(lambda b: b.shape == "circle")]'),('C','green'),('C','yellow'),('C','blue'),('C','red'),('E','exist'),('I','identy'),('N','[2]'),('N','[3]'),('N','range(1,17)'),('N','[1]'),('U','under'),('U','over'),('AND','und')]
+crude_rule = create_lex_rules()
 threshold = -0.5
 total_scores = defaultdict(lambda:defaultdict(int))
 
@@ -316,6 +316,13 @@ while True:
 
 
     if event == "-SKIP-":
+        window["-YES-"].hide_row()
+        window["-ENTER-"].unhide_row()
+        window["-INPUT-"].update(disabled=False)
+        window["-ENTER-"].update(visible=True)
+
+        window["-INPUT-"].update("")
+        
         with open(evaluation_file, "a", encoding="utf-8") as f:
             line = str(level) + "\t" + eval_picture + "\t" + eval_input + "\t" + eval_marked_picture + "\t" + "SKIPPED" + "\t" + str(lf) + "\n"
             f.writelines(line)
