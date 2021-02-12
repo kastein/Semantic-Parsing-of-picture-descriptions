@@ -1,38 +1,10 @@
 #!/usr/bin/env python
 
 """
-
+Defines our grammar: the lexicon (which actually is not used in the game when learning from scratch), the CFG rules
+and the functions on how to evaluate the logical forms with respect to a current Picture Object
+It also includes the CKY parser used to parse the input utterances and convert into logical forms
 """
-
-
-"""
-To see how the implementation works, it's probably easiest to study
-gold_lexicon, rules, and functions below. Together, these implement
-the example in table 1.
-
-To create new grammars, you just need to define the following:
-
-* A lexicon mapping strings to arrays of tuples, where the tuples
-  are (category, logical form) pairs.
-
-* A set of rules, each a list [X, Y, Z, (a,b)], where X is the left
-  daughter category, Y is the right daughter category, Z is the 
-  mother category, and (a,b) says which order of application to
-  use in the semantics: (0,1) means apply X to Y, and (1,0)
-  means apply Y to X.
-
-* A set of Python functions that will interpret the logical forms
-  (second members of all the nonterminal node labels).  If your
-  logical forms can be intepreted in native Python this can be 
-  empty.
-"""
-
-__author__ = "Christopher Potts and Percy Liang"
-__credits__ = []
-__license__ = "GNU general public license, version 2"
-__version__ = "2.0"
-__maintainer__ = "Christopher Potts"
-__email__ = "See the authors' websites"
 
 import sys
 from collections import defaultdict
@@ -72,8 +44,8 @@ def update_guess(blocks):
 
 def create_lex_rules():
     """
-    creates the crude lexical rules for starting from scratch
-    :return: list with all rules from the gold lexicon but without the specific words
+    creates the crude lexical rules for learning from scratch
+    :return: list containing all lists from gold lexicon with the (category, logical form) tuples
     """
     crude_rules = set()
     for key, value in gold_lexicon.items():
@@ -81,6 +53,13 @@ def create_lex_rules():
         
     return list(crude_rules)
 
+"""
+The framework below is taken from Potts & Liang
+We defined our own lexicon, rules and  functions and extended the main function demonstrating our grammar framework
+The Grammar class was taken from Potts & Liang and we adapted the CKY parser by adding backpointers and added the 
+methods needed to use the backpointers and recursively build the tree
+allcombos and sem were not changed by us
+"""
 
 class Grammar:
 
@@ -92,7 +71,12 @@ class Grammar:
         self.backpointers = defaultdict(list)
 
     def recursive_treebuild(self, current):
-        # print("current",current)
+        """
+        recursively builds up the tree parse tree based on self.backpointers
+        :param current: triple consisting of (Nonterminal, start_index, end_index) for which the trees with the
+                        root Nonterminal that covers the input from start_index to end_index should be build
+        :return: list of all possible trees with root Nonterminal covering start_index to end_index
+        """
         current_label = current[0]
         current_start = current[1]
         current_end = current[2]
@@ -104,10 +88,9 @@ class Grammar:
         else:
             possible_children = self.backpointers[current]
             for pointer in possible_children:
-                # print(pointer,len(pointer))
                 child1 = pointer[0]
                 child2 = pointer[1]
-                k = pointer[2]  # split in Katharinas Code
+                k = pointer[2]
                 left_subtrees = self.recursive_treebuild((child1, current_start, k))
                 right_subtrees = self.recursive_treebuild((child2, k, current_end))
 
@@ -118,15 +101,20 @@ class Grammar:
 
         return sub_trees
 
+
     def compute_parse_trees(self, n):
-        # start_point = ('V',0,n)
+        """
+        computes the parse trees rooted in the start symbol V and spanning words from position 0 to n
+        which corresponds to the whole input utterance
+        :param n: int length of the string that should be covered by the tree + 1
+        :return: list of all parse trees
+        """
         parse_trees = []
-        # for i in backpointers:
-        # print("key",i,backpointers[i])
         for l, x, y in self.backpointers:
             if l[0] == "V" and x == 0 and y == n:
                 parse_trees += self.recursive_treebuild((l, x, y))
         return parse_trees
+
 
     def gen(self, s):
         """CYK parsing, but we just keep the full derivations. The input
@@ -141,16 +129,15 @@ class Grammar:
             for syntax, semantic in self.lexicon[word]:
                 trace[(i - 1, i)].add((syntax, semantic))
                 self.backpointers[((syntax, semantic), i - 1, i)].append(word)
+
         for j in range(2, n):
             for i in range(j - 1, -1, -1):
                 for k in range(i + 1, j):
                     for c1, c2 in product(trace[(i, k)], trace[(k, j)]):
                         for lfnode in self.allcombos(c1, c2):
                             trace[(i, j)].add(lfnode)
-                            # print(c1,c2)
                             self.backpointers[(lfnode, i, j)].append((c1, c2, k))
         # Return only full parses, from the upper right of the chart:
-        # return buildtrees(trace[(0,n-1)])
         return self.compute_parse_trees(n - 1)
 
     def allcombos(self, c1, c2):
@@ -176,6 +163,7 @@ class Grammar:
 
 
 # The lexicon for our pictures
+# Lexicon maps strings to list of tuples of (category, logical form)
 gold_lexicon = {
     'form':[('B', 'block_filter([], (allblocks, allblocks))')],
     'forms':[('B', 'block_filter([], (allblocks, allblocks))')],
@@ -209,8 +197,10 @@ gold_lexicon = {
 }
 
 # The binarized rule set for our pictures, start symbol is V
-# The first rule corresponds to:
-# V -> EX  BN  semantics: apply EX(BN)
+# each entry is a list of four elements ['B', 'C', 'A', (i,j)]
+# where A is the parent category, B the left child and C the right child
+# (i,j) states that the logical form of the ith element is applied to the locigal form of the jth element
+# e.g. The first rule corresponds to: V -> EN  B  and specifies that EN is applied to B: EN(B)
 rules = [
     ['EN', 'B', 'V', (0, 1)],
     ['EN', 'BS', 'V', (0, 1)],
@@ -230,8 +220,8 @@ rules = [
     ['V', 'AND', 'VAND', (1, 0)]
 ]
 
-# These are needed to interpret our logical forms with eval. They are
-# imported into the namespace Grammar.sem to achieve that.
+# The functions that are used to interpret our logical forms with eval.
+# They are imported into the namespace Grammar.sem to achieve that.
 functions = {
     'identy': (lambda x: x),
     'exist': (lambda n: (lambda b: len(b[0]) != 0 and len(b[0]) in n and update_guess(b))),
@@ -271,7 +261,7 @@ if __name__ == '__main__':
         for blo in row:
             if blo:
                 allblocks2.append(blo)
-    allblocks=allblocks2
+    allblocks = allblocks2
 
     # parses all test sentences from semdata.py
     # prints the derived logical forms for each test sentence and whether the test sentence is true with respect to the example picture world.png

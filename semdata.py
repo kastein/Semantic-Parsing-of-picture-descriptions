@@ -104,6 +104,12 @@ test_utterances = [
     'there are two green circles under a blue circle'
 ]
 
+test_utterances_new = [
+    'there is a blue circle over a yellow circle',
+    'there is a blue circle over two yellow circles',
+    'there is a blue circle over one yellow circle'
+    ]
+
 
 # This is a list of triples (x, y, d), where x is an input string, y
 # is its preferred logical form, and d is the denotation of the
