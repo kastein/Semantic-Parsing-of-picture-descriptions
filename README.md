@@ -31,6 +31,9 @@ Please enter any name under which you would like to save your data.
 
 For the detailed instructions and examples please refer to the [Wiki](https://github.com/itsLuisa/Semantic-Parsing-of-picture-descriptions/wiki)
 
+## References
+
+Our parsing and learning framework is based on Liang, Percy and Christopher Potts. 2014. Bringing machine learning and compositional semantics together. *Annual Review of Linguistics* 1(1): 355–376. and uses code from [the corresponding demonstration code](https://github.com/cgpotts/annualreview-complearning).
 
 ## Files 
 * folder marked_pictures: pictures with guessed blocks for the test sentences
