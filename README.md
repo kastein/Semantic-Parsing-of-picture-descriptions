@@ -5,6 +5,8 @@ General research question:  Can we implement a model that learns a natural langu
 
 Focused research question:  Can we teach a computer a mapping from natural language picture descriptions to a logical representation?
 
+<div style="float:right;"><img src="https://user-images.githubusercontent.com/36165516/107762120-cf5e8980-6d2c-11eb-97d8-30ea3c3ea5a5.jpg" alt="Logo" height="180" align="right"></img></div>
+
 # SHAPELURN: An Interactive Language Learning Game
 
 ## Demo of the Prototype
