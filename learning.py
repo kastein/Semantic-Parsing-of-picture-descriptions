@@ -1,4 +1,8 @@
-4#!/usr/bin/env python
+# The following code was written by Christopher Potts and Percy Liang. We adjusted
+# evaluate  as written in the comments in this function.
+
+
+#!/usr/bin/env python
 
 """
 Defines the core learning framework.
@@ -130,7 +134,7 @@ def evaluate(
         train=None, 
         test=None, 
         classes=None,
-        true_or_false=None,
+        true_or_false=None, # We add this argument
         T=10, 
         eta=0.1, 
         output_transform=(lambda x : x)):
@@ -154,7 +158,7 @@ def evaluate(
 
     for f, val in sorted(list(w.items()), key=itemgetter(1), reverse=True):
         print("{} {}".format(f, val))
-    return w
+    return w # We don't let the trained model predict the denotation of the test sentences, but return the learnded weights
     
     
 
