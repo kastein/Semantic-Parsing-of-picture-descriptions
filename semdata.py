@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
 """
-Generates the dataset used for training and evaluating the semantic
-model defined in `synthesis.py`. The basis for this is `gold_lexicon`
-and its grammar, as defined in `grammar.py`.
+This file contains the training and test sentences used for developing,
+testing and debugging our grammar for SHAPELURN
+The functions at the end generate a training data set and a test data set
+based on the gold lexicon and the grammar in grammar.py
+The code is taken from Christopher Potts and Percy Liang (see below) and
+we replaced their train and test utterances with our sentences
 """
 
 __author__ = "Christopher Potts and Percy Liang"
@@ -22,16 +25,93 @@ gram = Grammar(gold_lexicon, rules, functions)
 
 # Train/test data for the demo:
 train_utterances = [
-    'there is a blue block',
+    'there are two blue squares',
+    'there is one yellow form',
+    'there are two blue squares and there is one blue triangle',
+    'there are three squares',
+    'there is a red triangle',
+    'there are two triangles',
+    'there is one blue triangle and there is one red triangle',
+    'there are two triangles and there is a yellow square',
+    'there is a blue square',
+    'there are two blue squares',
+    'there is one yellow square',
+    'there is a blue form',
+    'there is one red form'
 ]
 
 # Test:
+# Test Utterances for world.jpg
 test_utterances = [
-    'there is a blue block',
-    'there is one blue block',
-    'there are two blue blocks',
-    'there are two red blocks'
+    'there is a red triangle under a blue square',
+    'there is a red circle under a blue square',
+    'there are two blue squares',
+    'there are two triangles',
+    'there are three blue forms',
+    'there is one blue form', 
+    'there is a red triangle and there is a blue triangle',
+    'there is a blue square over a red triangle',
+    'there is a blue square over a yellow square over a red triangle',
+    'there is a blue square next to a blue square',
+    'there is a blue square over a yellow square over a blue triangle', 
+    'there is a red triangle under a blue triangle under a blue square',
+    'there is a red triangle under a yellow square under a blue triangle', 
+    'there is a yellow square to the left of a blue triangle',
+    'there is a yellow square to the right of a blue triangle'
+    ]
+
+# should all evaluate to true
+test_utterances = [
+    'there is a blue triangle',
+    'there is a red triangle',
+    'there is a blue square',
+    'there is a yellow square',
+    'there are two blue squares',
+    'there are three squares',
+    'there are two triangles',
+    'there is a red triangle under a blue square',
+    'there is a blue square over a yellow square',
+    'there is a yellow square next to a blue triangle',
+    'there is a blue square over a blue triangle over a red triangle'
 ]
+
+# Test Utterances for world2.jpg
+
+# Are all working
+test_utterances = [
+    'there is a square',
+    'there are three blue circles',
+    'there are two red triangles',
+    'there is a green square',
+    'there is a yellow triangle',
+    'there is a yellow form',
+    'there is a yellow triangle and there is a green square',
+    'there is a yellow triangle and there is a yellow circle',
+    'there is a yellow triangle and there is a red triangle',
+    'there is a green circle over a green circle',
+    'there is a green triangle under a red circle',
+    'there is a green circle to the right of a red circle',
+    'there is a green form next to a green form',
+    'there is a blue circle under a blue circle',
+    'there is a yellow circle over a blue circle',
+    'there is a red triangle over a yellow triangle',
+    'there is a yellow triangle under a red triangle',
+    'there is a red triangle under a yellow triangle',
+    'there is a yellow triangle over a red triangle',
+    'there is a blue triangle under a red triangle under a yellow triangle',
+    'there are two green circles under three blue circles',
+    'there are two green circles under two blue circles',
+    'there are two green circles under a blue circle',
+    'there is a red square or there is a green square',
+    'there is a red circle or there is a yellow circle'
+]
+
+test_utterances_new = [
+    'there is a blue circle over a yellow circle',
+    'there is a blue circle over two yellow circles',
+    'there is a blue circle over one yellow circle'
+    ]
+
 
 # This is a list of triples (x, y, d), where x is an input string, y
 # is its preferred logical form, and d is the denotation of the
@@ -43,6 +123,7 @@ for u in train_utterances:
     # to correspond to the preferences we expressed in the paper:
     lf = gram.gen(u)[0] 
     sem_train.append([u, lf, gram.sem(lf)])
+
 
 # A list of triples with the same format as the training data; the
 # algorithms should do well on the first three and fail on the last
