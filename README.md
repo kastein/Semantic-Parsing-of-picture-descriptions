@@ -18,8 +18,7 @@ In this folder the result data from your game  will be stored. (If your are test
 
 **Requirements**<br>
 Python 3 <br>
-tkinter <br>
-PIL <br>
+PIL (Pillow) <br>
 PySimpleGUI <br>
 Numpy <br>
 
