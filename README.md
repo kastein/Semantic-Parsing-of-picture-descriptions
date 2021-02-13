@@ -39,7 +39,7 @@ The project idea is based on Wang, S. I., Liang, P., & Manning, C. D. (2016). Le
 Our parsing and learning framework is based on Liang, Percy and Christopher Potts. 2014. Bringing machine learning and compositional semantics together. *Annual Review of Linguistics* 1(1): 355–376. and uses code from [the corresponding demonstration code](https://github.com/cgpotts/annualreview-complearning).
 
 ## Files 
-* folder marked_pictures: pictures with guessed blocks for the test sentences
+* folder marked_pictures: needed for running grammar.py, guesses for the test utterances in semdata.py will be saved here
 * folder pictures: example pictures as created by PictureLevel.py
 
 * BlockPictureGenerator.py: automatically creates and saves the pictures **documented**
