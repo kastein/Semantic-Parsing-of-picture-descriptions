@@ -4,6 +4,13 @@
 Defines our grammar: the lexicon (which actually is not used in the game when learning from scratch), the CFG rules
 and the functions on how to evaluate the logical forms with respect to a current Picture Object
 It also includes the CKY parser used to parse the input utterances and convert into logical forms
+
+Terminology:
+Difference between referenced and guessed blocks:
+for sentences like "there is a red circle" both refer to the same Block objects, i.e. the objects of all red circles in the Picture
+but for e.g. the sentence "there is a green triangle over a red square over a circle" referenced blocks consists of
+all green triangles that are over red squares that are over any circle
+whereas guessed blocks consists of all green triangles, red squares and circles that make this sentence true
 """
 
 import sys
@@ -34,11 +41,22 @@ def create_all_blocks(picture):
 
 def update_guess(blocks):
     """
-    updates the guessed_blocks variable by adding the given blocks to it
-    :param blocks: list of Block objects
+    updates the guessed_blocks variable by adding the referenced blocks and additionally
+    recursively backtracking all matching blocks in order to get the complete list of guessed blocks
+    :param blocks: list of Block objects, i.e. the referenced blocks
     :return: True
     """
-    guessed_blocks.update(set(blocks[1]))
+    guesses = set()
+    stack = blocks.copy()
+
+    while stack != []:
+        b = stack.pop()
+        guesses.add(b)
+        stack.extend(b.back_track)
+        b.back_track = []
+    for b in allblocks:
+        b.back_track = []
+    guessed_blocks.update(set(guesses))
     return True
 
 
@@ -165,21 +183,21 @@ class Grammar:
 # The lexicon for our pictures
 # Lexicon maps strings to list of tuples of (category, logical form)
 gold_lexicon = {
-    'form':[('B', 'block_filter([], (allblocks, allblocks))')],
-    'forms':[('B', 'block_filter([], (allblocks, allblocks))')],
-    'square': [('B', 'block_filter([lambda b: b.shape=="rectangle"],(allblocks, allblocks))')],
-    'squares': [('B', 'block_filter([lambda b: b.shape=="rectangle"],(allblocks, allblocks))')],
-    'triangle': [('B', 'block_filter([(lambda b: b.shape == "triangle")], (allblocks, allblocks))')],
-    'triangles': [('B', 'block_filter([(lambda b: b.shape == "triangle")], (allblocks, allblocks))')],
-    'circle': [('B', 'block_filter([(lambda b: b.shape == "circle")], (allblocks ,allblocks))')],
-    'circles': [('B', 'block_filter([(lambda b: b.shape == "circle")], (allblocks, allblocks))')],
+    'form':[('B', 'block_filter([], allblocks)')],
+    'forms':[('B', 'block_filter([], allblocks)')],
+    'square': [('B', 'block_filter([lambda b: b.shape=="rectangle"],allblocks)')],
+    'squares': [('B', 'block_filter([lambda b: b.shape=="rectangle"], allblocks)')],
+    'triangle': [('B', 'block_filter([(lambda b: b.shape == "triangle")], allblocks)')],
+    'triangles': [('B', 'block_filter([(lambda b: b.shape == "triangle")], allblocks)')],
+    'circle': [('B', 'block_filter([(lambda b: b.shape == "circle")], allblocks)')],
+    'circles': [('B', 'block_filter([(lambda b: b.shape == "circle")], allblocks)')],
     'green': [('C', 'green')],
     'yellow': [('C', 'yellow')],
     'blue': [('C', 'blue')],
     'red': [('C', 'red')],
-    'there': [('E', 'exist')],
-    'is': [('I', 'identy')],
-    'are': [('I', 'identy')],
+    'there': [('E', 'identity')],
+    'is': [('I', 'exist')],
+    'are': [('I', 'exist')],
     'a':[('N','range(1,17)')],
     'one':[('N','[1]')],
     'two':[('N','[2]')],
@@ -189,11 +207,11 @@ gold_lexicon = {
     'and': [('AND', 'und')],
     'or': [('AND', 'oder'),('AND','xoder')],
     'next': [('NEXT', 'next')],
-    'to': [('TO', 'to')],
-    'of': [('TO', 'to')],
+    'to': [('TO', 'identity')],
+    'of': [('TO', 'identity')],
     'left': [('LR', 'left')],
     'right': [('LR', 'right')],
-    'the': [('THE', 'the')]
+    'the': [('THE', 'identity')]
 
 }
 
@@ -207,7 +225,7 @@ rules = [
     ['EN', 'BS', 'V', (0, 1)],
     ['VAND', 'V', 'V', (0, 1)],
     ['E', 'N', 'EN', (0, 1)],
-    ['E', 'I', 'E', (1,0)],
+    ['E', 'I', 'E', (0, 1)],
     ['C', 'B', 'B', (0, 1)],
     ['B', 'L', 'BS', (1, 0)],
     ['POS', 'B', 'L', (0, 1)],
@@ -224,8 +242,8 @@ rules = [
 # The functions that are used to interpret our logical forms with eval.
 # They are imported into the namespace Grammar.sem to achieve that.
 functions = {
-    'identy': (lambda x: x),
-    'exist': (lambda n: (lambda b: len(b[0]) != 0 and len(b[0]) in n and update_guess(b))),
+    'identity': (lambda x: x),
+    'exist': (lambda n: (lambda b: update_guess(b) and len(b) in n)),
     'und': (lambda v1: (lambda v2: v1 and v2)),
     'oder': (lambda v1: (lambda v2: v1 or v2)),
     'xoder': (lambda v1: (lambda v2: (v1 and not v2) or (v2 and not v1))),
@@ -239,10 +257,7 @@ functions = {
     'over': (lambda n: (lambda x: (lambda y: position_test(y, x, n, "o")))),
     'next': (lambda n: (lambda x: (lambda y: position_test(y, x, n, "n")))),
     'left': (lambda n: (lambda x: (lambda y:position_test(y, x, n, "l")))),
-    'right': (lambda n: (lambda x: (lambda y: position_test(y, x, n, "r")))),
-    'to': (lambda x: x),
-    'the': (lambda x: x)
-    
+    'right': (lambda n: (lambda x: (lambda y: position_test(y, x, n, "r"))))
 }
 
 
@@ -274,6 +289,8 @@ if __name__ == '__main__':
         guessed_blocks = set()
         
         lfs = gram.gen(u)
+        if len(lfs) > 1:
+            print("longer")
         print("======================================================================")
         print('Utterance: {}'.format(u))
         for lf in lfs:
