@@ -7,17 +7,17 @@ class BackAndForth_Iterator:
     def next(self):
         if self.list == []:
             raise StopIteration
-        index += 1
-        if index >= len(self.list):
-            index = 0
-        return self.list[index]
+        self.index += 1
+        if self.index >= len(self.list):
+            self.index = 0
+        return self.list[self.index]
 
     def previous(self):
         if self.list == []:
             raise StopIteration
-        index -= 1
-        if index < 0:
-            index = len(self.somelist)-1
-        return self.list[index]
+        self.index -= 1
+        if self.index < 0:
+            self.index = len(self.somelist)-1
+        return self.list[self.index]
     
         
