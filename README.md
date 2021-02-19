@@ -22,6 +22,9 @@ PIL (Pillow) <br>
 PySimpleGUI <br>
 Numpy <br>
 
+to install the required packages run 
+```pip install -r requirements.txt```
+
 ## Basic Instructions 
 
 Hello! Welcome to SHAPELURN, where you can teach the computer any language of your choice!<br>
