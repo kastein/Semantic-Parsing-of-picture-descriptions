@@ -9,6 +9,7 @@ from Semantic_Learner import evaluate_semparse
 import math
 from collections import defaultdict
 from cossimforstem import sim_stemm
+from back_and_forth import BackAndForth_Iterator
 
 # inizializing grammar and learning algorithm
 crude_lexicon={}
@@ -196,15 +197,15 @@ while True:
         gram = Grammar(crude_lexicon,rules,functions)
 
         # generate all possible trees given the current rules
-        lfs = iter(gram.gen(inpt))
+        lfs = BackAndForth_Iterator(gram.gen(inpt))
         guessed_blocks.clear()
 
         # mark first possible guess in the picture
         try:
-            lf = next(lfs)
+            lf = lfs.next()
             while gram.sem(lf) == False:
                 guessed_blocks.clear()
-                lf=next(lfs)
+                lf=lfs.next()
             guess = []
             for b in guessed_blocks:
                 guess.append((b.y, b.x))
@@ -288,10 +289,10 @@ while True:
         # produce new guess (as above)
         guessed_blocks.clear()
         try:
-            lf = next(lfs)
+            lf = lfs.next()
             while gram.sem(lf) == False:
                 guessed_blocks.clear()
-                lf=next(lfs)
+                lf = lfs.next()
             guess = []
             print("GUESSEDBLOCKS",guessed_blocks)
             for b in guessed_blocks:
