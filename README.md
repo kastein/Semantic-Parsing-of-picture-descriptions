@@ -22,7 +22,7 @@ PIL (Pillow) <br>
 PySimpleGUI <br>
 Numpy <br>
 
-to install the required packages run 
+To install the required packages run 
 ```pip install -r requirements.txt```
 
 ## Basic Instructions 
