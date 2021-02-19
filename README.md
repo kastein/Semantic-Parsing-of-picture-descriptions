@@ -22,6 +22,9 @@ PIL (Pillow) <br>
 PySimpleGUI <br>
 Numpy <br>
 
+To install the required packages run 
+```pip install -r requirements.txt```
+
 ## Basic Instructions 
 
 Hello! Welcome to SHAPELURN, where you can teach the computer any language of your choice!<br>
@@ -35,11 +38,11 @@ For the detailed instructions and examples please refer to the [Wiki](https://gi
 
 ## References
 
-The project idea is based on Wang, S. I., Liang, P., & Manning, C. D. (2016). Learning language games through interaction. arXiv preprint arXiv:1606.02447.
+The project idea is based on Wang, S. I., Liang, P., & Manning, C. D. (2016). Learning language games through interaction. arXiv preprint arXiv:1606.02447. <br>
 Our parsing and learning framework is based on Liang, Percy and Christopher Potts. 2014. Bringing machine learning and compositional semantics together. *Annual Review of Linguistics* 1(1): 355–376. and uses code from [the corresponding demonstration code](https://github.com/cgpotts/annualreview-complearning).
 
 ## Files 
-* folder marked_pictures: pictures with guessed blocks for the test sentences
+* folder marked_pictures: needed for running grammar.py, guesses for the test utterances in semdata.py will be saved here
 * folder pictures: example pictures as created by PictureLevel.py
 
 * BlockPictureGenerator.py: automatically creates and saves the pictures **documented**
@@ -49,7 +52,8 @@ Our parsing and learning framework is based on Liang, Percy and Christopher Pott
 * Semantic_Learner.py **documented**
 * eval_helper.py: functions needed in grammar.py to evaluate truth of description **documented**
 * grammar.py: defines the grammar, the evaluation of logical forms and the parser **documented**
-* gui_simple: working GUI **documented**
+* gui_simple.py: working GUI **documented
+* back_and_forth.py: An iterator class, that can go back and forth through a list
 * learning.py: the Stochastic Gradient Descent learn algorithm **documented** 
 * semdata.py: training and test sentences **documented**
 * word.py and world2.png: example picture used for demo of grammar.py with test sentences from semdata.py

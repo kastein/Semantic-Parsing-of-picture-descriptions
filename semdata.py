@@ -102,17 +102,35 @@ test_utterances = [
     'there are two green circles under three blue circles',
     'there are two green circles under two blue circles',
     'there are two green circles under a blue circle',
-    'there is a red square or there is a green square',
-    'there is a red circle or there is a yellow circle'
-]
-
-test_utterances_new = [
     'there is a blue circle over a yellow circle',
     'there is a blue circle over two yellow circles',
-    'there is a blue circle over one yellow circle'
+    'there is a blue circle over one yellow circle',
+    'there are two green circles under one yellow circle under a red circles'
+]
+
+test_utterances = [
+    'there is a blue triangle under a red triangle under a yellow triangle'
     ]
 
 
+
+test_utterances_new = [
+    'there is a red square or there is a green square',
+    'there is a red circle or there is a yellow circle'
+    ]
+
+test_utterances_flex = [
+    'there there is a green circle to the left of a green triangle',
+    'is a green circle to the left of a green triangle',
+    'is a circle green to the left of a triangle green',
+    'there is a green circle left of a green triangle',
+    'there there is a circle green to left of a triangle green',
+    'a green circle to the left of a green triangle there is'
+    ]
+
+
+
+"""
 # This is a list of triples (x, y, d), where x is an input string, y
 # is its preferred logical form, and d is the denotation of the
 # logical form y. The semantic parsing algorithms use only x and y,
@@ -134,4 +152,5 @@ for u in test_utterances:
     # correspond to the preferences we expressed in the paper:
     lf = gram.gen(u)[-1]
     sem_test.append([u, lf, gram.sem(lf)])
+"""
 

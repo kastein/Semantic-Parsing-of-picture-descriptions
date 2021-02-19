@@ -42,7 +42,11 @@ coordinates = {1:{1:([(55,55),(95,95)]),2:([(105,55),(145,95)]),3:([(155,55),(19
 
 class Block:
     """
-    Object Block has attributes colour and x and y coordinate and shape (can be circle, triangle or rectangle)
+    Object Block has attributes
+    colour: string, a colour from the colour list defined above
+    x and y coordinate: ints (with respect to the position in the picture grid, i.e. x=1 and y=1 is the block in the upper left corner)
+    shape: string, a shape from the shape list defined above
+    back_track: list, for keeping track of relations between blocks
     """
     def __init__(self, colour, shape):
         """
@@ -53,6 +57,7 @@ class Block:
         self.shape = shape
         self.x = None
         self.y = None
+        self.back_track = []
 
     def set_coordinates(self, x, y):
         """
@@ -70,6 +75,13 @@ class Block:
         """
         s = self.shape + ": " + self.colour
         return s
+
+    def keep_track(self, block):
+        """
+        adds a block to the back_track list
+        :param block: a Block object
+        """
+        self.back_track.append(block)
 
 
 

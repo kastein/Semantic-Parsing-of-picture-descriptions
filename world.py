@@ -5,7 +5,7 @@ creates a list of blocks corresponding to the picture world2.png
 
 class Block:
     """
-    Object Block has attributes colour and x and y coordinate
+    Object Block has attributes colour and x and y coordinate and shape (can be circle, triangle or rectangle)
     """
     def __init__(self, colour, shape):
         """
@@ -16,16 +16,27 @@ class Block:
         self.shape = shape
         self.x = None
         self.y = None
+        self.back_track = []
 
     def set_coordinates(self, x, y):
         """
-        sets the coordinates of the block w.r.t. the position in the grid
-        :param x:
-        :param y:
+        sets the coordinates of the block w.r.t. the position in the grid, upper left corner has coordinates (0,0)
+        :param x: column index
+        :param y: row index
         :return:
         """
         self.x = x
         self.y = y
+
+    def __str__(self):
+        """
+        creates a readable string reprsentation of a Block object
+        """
+        s = self.shape + ": " + self.colour
+        return s
+
+    def keep_track(self, block):
+        self.back_track.append(block)
 
 
 def set_all_coordinates(chart):

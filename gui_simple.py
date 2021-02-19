@@ -9,6 +9,7 @@ from Semantic_Learner import evaluate_semparse
 import math
 from collections import defaultdict
 from cossimforstem import sim_stemm
+from back_and_forth import BackAndForth_Iterator
 
 # inizializing grammar and learning algorithm
 crude_lexicon={}
@@ -53,7 +54,8 @@ game_screen = [
     [
         sg.Text("Did you refer to this?"),
         sg.Button("YES", key="-YES-", disabled=True),
-        sg.Button("NO", key="-NO-", disabled=True),
+        sg.Button("next", key="-NO-", disabled=True),
+        sg.Button("back",key="-NO2-",disabled=True),
         sg.Button("SKIP", key="-SKIP-", disabled=True)
     ],
     [
@@ -155,6 +157,7 @@ while True:
         window["-FEEDBACKINSTR-"].hide_row()
         window["-YES-"].update(disabled=False)
         window["-NO-"].update(disabled=False)
+        window["-NO2-"].update(disabled=False)
         window["-SKIP-"].update(disabled=False)
         window["-YES-"].hide_row()
         window["-NEXTINSTR-"].hide_row()
@@ -196,15 +199,15 @@ while True:
         gram = Grammar(crude_lexicon,rules,functions)
 
         # generate all possible trees given the current rules
-        lfs = iter(gram.gen(inpt))
+        lfs = BackAndForth_Iterator(gram.gen(inpt))
         guessed_blocks.clear()
 
         # mark first possible guess in the picture
         try:
-            lf = next(lfs)
+            lf = lfs.next()
             while gram.sem(lf) == False:
                 guessed_blocks.clear()
-                lf=next(lfs)
+                lf=lfs.next()
             guess = []
             for b in guessed_blocks:
                 guess.append((b.y, b.x))
@@ -288,10 +291,10 @@ while True:
         # produce new guess (as above)
         guessed_blocks.clear()
         try:
-            lf = next(lfs)
+            lf = lfs.next()
             while gram.sem(lf) == False:
                 guessed_blocks.clear()
-                lf=next(lfs)
+                lf = lfs.next()
             guess = []
             print("GUESSEDBLOCKS",guessed_blocks)
             for b in guessed_blocks:
@@ -304,6 +307,45 @@ while True:
 
         # if we run out of options, show the next picture
         except StopIteration:
+            window["-YES-"].hide_row()
+            window["-ENTER-"].unhide_row()
+            window["-INPUT-"].update(disabled=False)
+            window["-ENTER-"].update(visible=True)
+            window["-INPUT-"].update("")
+
+            if i_picture >= 10:
+                i_picture = 0
+                level += 1
+            i_picture += 1
+            current_pic = setPicParameters(level, i_picture, session_name)
+            current_pic.draw()
+            # Katharina added following line
+            create_all_blocks(current_pic)
+            window["-IMAGE-"].update(filename=picture_path(level, i_picture, session_name))
+            eval_picture = str(picture_path(level, i_picture, session_name))
+            window["-LEVEL-"].update("Level " + str(level) + ", Picture " + str(i_picture) + ":")
+
+    if event == "-NO2-":
+        # go to the step one before
+        guessed_blocks.clear()
+        try:
+            lf = lfs.previous()
+            while gram.sem(lf) == False:
+                guessed_blocks.clear()
+                lf = lfs.previous()
+            guess = []
+            print("GUESSEDBLOCKS",guessed_blocks)
+            for b in guessed_blocks:
+                guess.append((b.y, b.x))
+            guessed_blocks.clear()
+            current_pic.mark(guess)
+            window["-IMAGE-"].update(filename=picture_path(level, i_picture, session_name, guess=True))
+            eval_marked_picture = str(picture_path(level, i_picture, session_name, guess=True))
+            eval_attempts += 1
+
+        # if we run out of options, show the next picture
+        except StopIteration:
+            print("HÄÄÄÄ")
             window["-YES-"].hide_row()
             window["-ENTER-"].unhide_row()
             window["-INPUT-"].update(disabled=False)
